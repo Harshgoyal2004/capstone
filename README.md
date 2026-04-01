@@ -1,4 +1,13 @@
-<![CDATA[<div align="center">
+---
+title: AI Health Screening
+emoji: 🏥
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
+<div align="center">
 
 # 🏥 AI Health Screening Assistant
 

@@ -1,0 +1,144 @@
+\chapter{\MakeUppercase{Methodology and Testing}}
+\justifying
+
+\section{Model Training Methodology}
+
+\subsection{ECGNet Training}
+
+The MIT-BIH Arrhythmia Database was preprocessed using the WFDB Python library. Beat extraction followed the procedure described in Chapter 4, yielding a total of 109,446 labelled beats. The dataset exhibits severe class imbalance: 72.6\% Normal (N), 16.2\% Paced (Q), 5.5\% Ventricular (V), 4.0\% Supraventricular (S), and 0.9\% Fusion (F) beats.
+
+To address this imbalance, \texttt{torch.utils.data.WeightedRandomSampler} was employed during training, assigning sample weights inversely proportional to class frequency. Focal Loss ($\gamma = 2$) was additionally used to further down-weight confidently-classified (predominantly Normal) samples and focus gradient updates on rare, clinically significant beat types.
+
+\begin{table}[h!]
+\centering
+\caption{ECGNet Training Hyperparameters}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Hyperparameter} & \textbf{Value} \\
+\hline
+Optimiser & AdamW (weight\_decay = $10^{-4}$) \\
+Learning Rate & $3 \times 10^{-4}$ \\
+Batch Size & 256 \\
+Epochs & 25 \\
+Loss Function & Focal Loss ($\gamma = 2$) \\
+Sampler & WeightedRandomSampler \\
+Device & CUDA (Google Colab T4) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{DiabetesNet Training}
+
+The Pima Indians Diabetes Dataset (768 samples) was split into 614 training and 154 test samples using stratified sampling (\texttt{random\_state=42}). All 8 features were normalised using \texttt{sklearn.preprocessing.StandardScaler} fitted on the training set only, and the scaler statistics were extracted and hard-coded into \texttt{inference/diabetes.py} to avoid runtime dependency on scikit-learn for inference.
+
+\begin{table}[h!]
+\centering
+\caption{DiabetesNet Training Hyperparameters}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Hyperparameter} & \textbf{Value} \\
+\hline
+Optimiser & Adam \\
+Learning Rate & $1 \times 10^{-3}$ \\
+Batch Size & 32 \\
+Epochs & 80 \\
+Loss Function & BCEWithLogitsLoss \\
+Dropout & 0.3 (Layer 1), 0.2 (Layer 2) \\
+Device & CUDA (Google Colab T4) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{ParkinsonNet Training}
+
+The UCI Parkinson's Dataset (195 recordings) was split into 156 training and 39 test samples. The higher dropout rates (0.4 and 0.3) applied in ParkinsonNet reflect the smaller dataset size and the need to prevent subject-level overfitting. All 22 features were StandardScaler-normalised.
+
+\begin{table}[h!]
+\centering
+\caption{ParkinsonNet Training Hyperparameters}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Hyperparameter} & \textbf{Value} \\
+\hline
+Optimiser & Adam \\
+Learning Rate & $1 \times 10^{-3}$ \\
+Batch Size & 16 \\
+Epochs & 120 \\
+Loss Function & BCEWithLogitsLoss \\
+Dropout & 0.4 (Layer 1), 0.3 (Layer 2) \\
+Device & CUDA (Google Colab T4) \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Signal Processing Validation}
+
+The \ac{ecg} preprocessing pipeline was validated against the MIT-BIH Arrhythmia Database annotations. The R-peak detection algorithm achieved $>$95\% sensitivity on clean signal segments. Figure 5.1 illustrates the ECG preprocessing stages for a representative Normal beat.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.75\linewidth]{images/sample-graph.pdf}
+	\caption{Representative \ac{ecg} Beat — Raw Signal (Top), Bandpass Filtered Signal (Middle), Segmented Beat Window (Bottom)}
+	\label{fig:ecgpreprocess}
+\end{figure}
+
+For voice feature extraction, the pYIN algorithm \cite{pyin2014} was used for fundamental frequency estimation, which outperforms the classical autocorrelation-based YIN algorithm on speech with modulated pitch — important for Parkinson's patients exhibiting tremor-related pitch variation.
+
+\section{System Testing}
+
+\subsection{Unit Testing}
+
+Individual inference modules were tested independently:
+
+\begin{itemize}
+	\item \textbf{ECGNet}: The \texttt{predict()} function was tested on the provided \texttt{sample\_ecg.csv} (synthetic normal sinus rhythm at 72 bpm), producing a cardiac risk probability of approximately 0.12 (Low risk). Edge cases tested include: empty CSV, single-column vs. multi-column CSV, signal shorter than one beat window, no R-peaks detected.
+	\item \textbf{DiabetesNet}: The \texttt{predict()} function was tested with the standard PIDD mean feature values, producing a borderline risk (probability $\approx$ 0.42). Edge cases include: missing feature keys (default to 0.0), string-valued inputs (caught and defaulted), negative values.
+	\item \textbf{ParkinsonNet}: The \texttt{predict()} function was tested on the provided \texttt{sample\_voice.wav} (synthetic sustained vowel phonation at 150 Hz). Edge cases include: very short audio ($<$ 1s), silent audio, audio at non-standard sample rates (resampled to 22050 Hz by librosa).
+\end{itemize}
+
+\subsection{Integration Testing}
+
+End-to-end integration testing was performed by:
+
+\begin{enumerate}
+	\item Starting the FastAPI backend (\texttt{uvicorn app:app --reload --port 8000})
+	\item Starting the Streamlit frontend (\texttt{streamlit run ui/streamlit\_app.py --server.port 8501})
+	\item Submitting a complete screening session via the chat interface
+	\item Verifying that \texttt{<MODEL\_INPUT>} was correctly generated and parsed
+	\item Confirming that all three models produced risk outputs
+	\item Verifying the triage classification against manual computation
+	\item Confirming the Gemini explanation was non-diagnostic and referenced correct risk levels
+\end{enumerate}
+
+\begin{table}[h!]
+\centering
+\caption{Integration Test Results Summary}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Test Case} & \textbf{Input} & \textbf{Expected Output} & \textbf{Result} \\
+\hline
+Standard screening (all files uploaded) & sample\_ecg.csv + sample\_voice.wav + valid biomarkers & 3 risk scores + triage & PASS \\
+Cardiac only (no voice) & sample\_ecg.csv only & Cardiac risk + motor = not\_assessed & PASS \\
+Biomarkers only (no files) & Biomarkers only & Cardiac = not\_assessed + metabolic risk & PASS \\
+Rate limit fallback & Forced Gemini 429 error & Switch to next Gemini model & PASS \\
+Invalid ECG file & Malformed CSV & Moderate risk (error fallback) & PASS \\
+\hline
+\end{tabular}}
+\end{table}
+
+\subsection{API Testing}
+
+The FastAPI backend was tested using direct HTTP requests to verify \ac{api} contract compliance:
+
+\begin{itemize}
+	\item \textbf{POST /upload}: Confirmed correct file type detection (CSV $\rightarrow$ ecg, WAV $\rightarrow$ voice), rejection of unsupported formats (e.g., .pdf, .txt), and correct file path return.
+	\item \textbf{POST /chat}: Confirmed correct JSON schema for both the no-model-result response and the model-result response. Verified \texttt{model\_results} is \texttt{null} when \texttt{<MODEL\_INPUT>} is absent.
+	\item \textbf{GET /health}: Confirmed 200 response with \texttt{\{"status":"healthy","models\_loaded":true\}}.
+\end{itemize}
+
+\end{document}

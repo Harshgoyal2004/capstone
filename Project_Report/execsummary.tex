@@ -1,0 +1,11 @@
+\begin{center}
+	\Large{\textbf{EXECUTIVE SUMMARY}}	
+\end{center}
+\vspace{1em}
+\normalsize
+\hspace{1cm} This report presents the design, development, and evaluation of an \ac{ai}-powered conversational health screening platform developed as part of the B.Tech. Computer Science and Engineering capstone project at Vellore Institute of Technology (VIT), Vellore. The system, titled \textit{AI Health Screening Assistant}, integrates three pretrained PyTorch deep learning models with a Google Gemini \ac{llm} chat interface to perform simultaneous cardiac, metabolic, and motor risk assessment through natural conversation.
+
+\hspace{1cm} Cardiovascular diseases, diabetes mellitus, and Parkinson's disease collectively account for a significant proportion of global morbidity and mortality. Early detection remains one of the most effective strategies to improve outcomes. However, access to timely, affordable preliminary screening is a persistent gap, particularly in resource-constrained or remote settings. This project proposes a multi-disease early screening system that leverages the power of \ac{ai} and \ac{ml} to bridge this gap through an accessible, conversational interface.
+
+\hspace{1cm} The platform employs a FastAPI backend orchestrating three neural networks: \textit{ECGNet} (a Multi-Scale Attention \ac{cnn} for cardiac arrhythmia classification), \textit{DiabetesNet} (a tabular \ac{dnn} trained on the Pima Indians Diabetes Dataset), and \textit{ParkinsonNet} (a voice-feature \ac{dnn} trained on the UCI Parkinson's Dataset). A Streamlit frontend provides an intuitive chat interface. The Google Gemini \ac{llm} conducts a structured medical intake interview, generates a structured \texttt{MODEL\_INPUT} block upon completion, and subsequently interprets model-generated risk scores in empathetic, non-diagnostic language. The system achieves test accuracies of 60.0\% (ECGNet), 73.4\% (DiabetesNet), and 97.4\% (ParkinsonNet), with an AUROC of 0.7562, 0.8170, and 0.9931 respectively.
+

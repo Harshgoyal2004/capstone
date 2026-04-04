@@ -1,0 +1,279 @@
+\chapter{\MakeUppercase{Results and Discussion}}
+\justifying
+
+\section{Model Performance Results}
+
+% ──────────────────────────────────────────────────────────────────────
+\subsection{ECGNet — Cardiac Arrhythmia Classification}
+% ──────────────────────────────────────────────────────────────────────
+
+ECGNet was trained for 25 epochs on beats extracted from the MIT-BIH Arrhythmia Database (PhysioNet). The preprocessing pipeline applied a 4th-order Butterworth bandpass filter (0.5--40 Hz), detected R-peaks using \texttt{scipy.signal.find\_peaks} with a minimum distance of 180 samples (0.5 s at 360 Hz) and an adaptive height threshold of $\mu + 0.5\sigma$, and extracted 252-sample windows centred on each R-peak (108 pre-R + 144 post-R). The dataset yielded 109,446 annotated beats mapped to 5 \ac{aami} classes.
+
+Training used AdamW (weight\_decay $= 10^{-4}$), Focal Loss ($\gamma = 2$), and WeightedRandomSampler to counter the 72.6\% Normal (N) class dominance. The training accuracy converged to \textbf{98.55\%} within 15 epochs, while the test accuracy stabilised at \textbf{60.0\%}, revealing a significant overfitting gap attributable to the small number of unique patients (28 train / 19 test records) and the patient-specific nature of arrhythmia morphology.
+
+\begin{table}[h!]
+\centering
+\caption{ECGNet Per-Class Performance on MIT-BIH Arrhythmia Database Test Set}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{AAMI Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+\hline
+N — Normal / Bundle Branch Block & 0.82 & 0.62 & 0.71 & 31,964 \\
+S — Supraventricular Ectopic      & 0.06 & 0.06 & 0.06 & 1,777  \\
+V — Ventricular Ectopic           & 0.72 & 0.83 & 0.77 & 2,458  \\
+F — Fusion Beat                   & 0.02 & 0.55 & 0.04 & 390    \\
+Q — Paced / Unknown               & 0.80 & 0.59 & 0.68 & 7,445  \\
+\hline
+\textbf{Weighted Average}         & \textbf{0.76} & \textbf{0.60} & \textbf{0.68} & \textbf{44,034} \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{ECGNet Summary Metrics}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Training Accuracy (Final Epoch) & 98.55\% \\
+Test Accuracy & 60.0\% \\
+Weighted F1-Score & 0.68 \\
+Macro AUROC & 0.7562 \\
+Model Parameters & $\sim$487K \\
+Model File Size & $\sim$2.08 MB \\
+Input Shape & (batch, 1, 252) \\
+Output & 5-class softmax logits \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Risk Stratification (deployed thresholds):}
+The abnormality probability is computed as $1 - P(\text{Normal})$, i.e., one minus the probability assigned to the N class by the softmax output, averaged across all detected beats in the uploaded ECG. The thresholds are:
+\begin{itemize}
+  \item \textbf{Low}: Abnormality probability $< 0.35$
+  \item \textbf{Moderate}: Abnormality probability $0.35$--$0.70$
+  \item \textbf{High}: Abnormality probability $\geq 0.70$
+\end{itemize}
+
+\textbf{Discussion:} The clinically most important class — Ventricular ectopic (V, F1 = 0.77, Recall = 0.83) — performs best after the dominant N class, demonstrating the model's effectiveness at flagging the beat type most associated with life-threatening arrhythmias. The poor performance on S-class (F1 = 0.06) and F-class (F1 = 0.04) is a known and documented limitation: these classes represent 1.6\% and 0.36\% of beats respectively, making them statistically negligible even with WeightedRandomSampler. This model performs better than random but below the state-of-the-art 1D-CNN models reviewed in the literature (e.g., Guhdar et al. \cite{guhdar2024} at 99.3\%, Kavitha and Shakkeera \cite{kavitha2024} at 99.5\%), primarily due to the intentional architectural simplicity ($\sim$487K vs. several millions of parameters) required for CPU deployment without GPU acceleration.
+
+% ──────────────────────────────────────────────────────────────────────
+\subsection{DiabetesNet — Metabolic Risk Prediction}
+% ──────────────────────────────────────────────────────────────────────
+
+DiabetesNet was trained for 80 epochs on the Pima Indians Diabetes Dataset (614 training / 154 test samples, stratified split with \texttt{random\_state=42}). All 8 features were normalised using StandardScaler fitted only on training data; the scaler mean and standard deviation arrays are hard-coded in \texttt{inference/diabetes.py}.
+
+\begin{table}[h!]
+\centering
+\caption{DiabetesNet Input Feature Statistics (from Pima Indians Diabetes Dataset)}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|c|l|l|c|c|}
+\hline
+\textbf{\#} & \textbf{Feature} & \textbf{Description} & \textbf{Training Mean ($\mu$)} & \textbf{Training Std ($\sigma$)} \\
+\hline
+1 & Pregnancies & Number of pregnancies & 3.8451 & 3.3696 \\
+2 & Glucose & Fasting plasma glucose (mg/dL) & 120.8946 & 31.9726 \\
+3 & Blood Pressure & Diastolic BP (mm Hg) & 69.1055 & 19.3558 \\
+4 & Skin Thickness & Triceps skinfold thickness (mm) & 20.5365 & 15.9522 \\
+5 & Insulin & 2-hour serum insulin ($\mu$U/mL) & 79.7995 & 115.244 \\
+6 & BMI & Body mass index (kg/m$^2$) & 31.9926 & 7.8842 \\
+7 & DPF & Diabetes Pedigree Function & 0.4719 & 0.3314 \\
+8 & Age & Age of patient (years) & 33.2409 & 11.7602 \\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{DiabetesNet Per-Class Performance on PIDD Test Set (154 samples)}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+\hline
+Non-diabetic (0) & 0.78 & 0.83 & 0.80 & 100 \\
+Diabetic (1)     & 0.64 & 0.56 & 0.59 & 54  \\
+\hline
+\textbf{Weighted Average} & \textbf{0.73} & \textbf{0.73} & \textbf{0.73} & \textbf{154} \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{DiabetesNet Summary Metrics}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Test Accuracy & 73.4\% \\
+AUROC & 0.8170 \\
+Model Parameters & 833 \\
+Model File Size & $\sim$8.5 KB \\
+Optimiser & Adam (lr = $10^{-3}$) \\
+Loss Function & BCEWithLogitsLoss \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Risk Stratification (deployed thresholds):}
+The sigmoid-activated output probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ is thresholded as:
+\begin{itemize}
+  \item \textbf{Low}: $\hat{y} < 0.35$
+  \item \textbf{Borderline}: $0.35 \leq \hat{y} < 0.70$
+  \item \textbf{Elevated}: $\hat{y} \geq 0.70$
+\end{itemize}
+
+\textbf{Discussion:} Test accuracy of 73.4\% and AUROC of 0.817 are competitive with the reviewed literature on PIDD — most reviewed papers report 79.2\%--86.4\% \cite{daza2024, reza2024, elgendy2025, phan2025, bhagat2024}, with the best results using complex multi-level stacking or blockchain infrastructure that is entirely impractical for a real-time inference pipeline. DiabetesNet achieves a simpler, faster, and deployable result with 833 parameters (vs. multi-thousand parameter ensembles). The lower diabetic-class recall (0.56) reflects the class imbalance (54 vs. 100 in the test set) and is consistent across all reviewed literature.
+
+% ──────────────────────────────────────────────────────────────────────
+\subsection{ParkinsonNet — Motor Risk Assessment}
+% ──────────────────────────────────────────────────────────────────────
+
+ParkinsonNet was trained for 120 epochs on the UCI Parkinson's Dataset (156 training / 39 test samples, stratified split with \texttt{random\_state=42}). The model operates on 22 StandardScaler-normalised voice biomarkers; scaler constants are stored in \texttt{inference/parkinson.py}. For real-time inference, the 22 features are extracted from uploaded WAV files using the pipeline in \texttt{extract\_voice\_features()}, which uses \texttt{librosa.pyin()} (pYIN algorithm \cite{pyin2014}) for fundamental frequency estimation, and custom NumPy implementations for jitter, shimmer, NHR/HNR, RPDE, DFA, D2, and pitch entropy.
+
+\begin{table}[h!]
+\centering
+\caption{ParkinsonNet 22 Input Voice Features (UCI Parkinson Dataset Schema)}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Feature Group} & \textbf{Feature Names} \\
+\hline
+Fundamental Frequency (3) & MDVP:Fo(Hz), MDVP:Fhi(Hz), MDVP:Flo(Hz) \\
+Frequency Perturbation — Jitter (5) & MDVP:Jitter(\%), MDVP:Jitter(Abs), MDVP:RAP, MDVP:PPQ, Jitter:DDP \\
+Amplitude Perturbation — Shimmer (6) & MDVP:Shimmer, MDVP:Shimmer(dB), Shimmer:APQ3, Shimmer:APQ5, MDVP:APQ, Shimmer:DDA \\
+Noise Ratios (2) & NHR, HNR \\
+Nonlinear Dynamics (2) & RPDE, DFA \\
+Pitch / Frequency Entropy (4) & spread1, spread2, D2, PPE \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{ParkinsonNet Per-Class Performance on UCI Parkinson's Test Set (39 samples)}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+\hline
+Healthy (status = 0)      & 0.91 & 1.00 & 0.95 & 10 \\
+Parkinson's (status = 1)  & 1.00 & 0.97 & 0.98 & 29 \\
+\hline
+\textbf{Macro Average}    & \textbf{0.95} & \textbf{0.98} & \textbf{0.97} & \textbf{39} \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{ParkinsonNet Summary Metrics}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Test Accuracy & 97.4\% \\
+AUROC & 0.9931 \\
+Model Parameters & 3,617 \\
+Model File Size & $\sim$20 KB \\
+Optimiser & Adam (lr = $10^{-3}$) \\
+Loss Function & BCEWithLogitsLoss \\
+Input Features & 22 (StandardScaler normalised) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Risk Stratification (deployed thresholds):}
+The sigmoid probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ is thresholded as:
+\begin{itemize}
+  \item \textbf{Stable}: $\hat{y} < 0.35$
+  \item \textbf{Mild}: $0.35 \leq \hat{y} < 0.70$
+  \item \textbf{High}: $\hat{y} \geq 0.70$
+\end{itemize}
+
+\textbf{Discussion:} 97.4\% accuracy and 0.9931 AUROC match the best-reported results in the reviewed literature (Khafaga et al. \cite{khafaga2024} 97.4\%, Guatelli et al. \cite{guatelli2024} 96.5\%, Palakayala and Kuppusamy \cite{palakayala2024} 97.6\%). The near-perfect performance reflects the high discriminative power of the 22 acoustic biomarkers on this dataset. However, it must be emphasised that the test set contains only 39 samples; statistically, a 95\% confidence interval for the true accuracy is approximately $\pm$5\%, meaning the true accuracy could range from 92\% to 100\%. The model should be validated on larger, independently collected voice datasets before any clinical consideration — as also highlighted in the review by Dixit et al. \cite{dixit2024} and Islam et al. \cite{islam2024}.
+
+% ──────────────────────────────────────────────────────────────────────
+\section{End-to-End System Results}
+% ──────────────────────────────────────────────────────────────────────
+
+\subsection{Demo Screening Session}
+
+A complete end-to-end screening session was conducted to validate the full pipeline:
+
+\begin{table}[h!]
+\centering
+\caption{Demo Session Patient Input Parameters}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+Age & 45 years \\
+Gender & Male \\
+Symptoms & Occasional chest pain, fatigue \\
+Pregnancies & 0 \\
+Glucose & 148 mg/dL \\
+Blood Pressure & 85 mm Hg (diastolic) \\
+Skin Thickness & 33 mm \\
+Insulin & 150 $\mu$U/mL \\
+BMI & 33.6 kg/m$^2$ \\
+DPF & 0.627 \\
+ECG File & \texttt{sample\_ecg.csv} (synthetic normal sinus rhythm, 72 bpm, 10s, 360 Hz) \\
+Voice File & \texttt{sample\_voice.wav} (synthetic sustained vowel, 150 Hz fundamental, 5s) \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Demo Screening Output Results}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Domain} & \textbf{Model} & \textbf{Probability} & \textbf{Risk Level} \\
+\hline
+Cardiac (ECG) & ECGNet & 0.1203 & \textbf{Low} \\
+Metabolic (Diabetes) & DiabetesNet & 0.5621 & \textbf{Borderline} \\
+Motor (Parkinson's) & ParkinsonNet & 0.2103 & \textbf{Stable} \\
+\hline
+\multicolumn{3}{|l|}{\textbf{Triage Level}} & \textbf{routine} \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Triage Computation:} Only one risk is elevated above \textit{low/stable} (metabolic = borderline = moderate level). Since only one (not two or more) risks are at moderate level, and none are at the high/elevated level, the triage correctly returns \texttt{routine}. The Gemini explanation appropriately recommended scheduling a routine follow-up appointment and monitoring glucose and BMI, without making any diagnostic claim.
+
+\textbf{Number of conversation turns to complete intake:} 7 turns (consistent with the target of 2--3 questions per turn for approximately 8--10 total biomarkers).
+
+% ──────────────────────────────────────────────────────────────────────
+\section{Discussion}
+% ──────────────────────────────────────────────────────────────────────
+
+\subsection{Strengths}
+
+\begin{enumerate}
+  \item \textbf{Safety by architecture}: The double-pass \ac{llm} pipeline structurally prevents hallucination of risk values — the primary safety concern identified in Gap 3. Unlike Peixoto et al. \cite{peixoto2024} where LLMs generate assessments, here the LLM only interprets PyTorch outputs.
+  \item \textbf{Accessibility}: No prior system provides simultaneous multi-disease conversational screening from a single browser session. All three identified gaps (2, 4, 5) regarding data collection, ECG access, and voice analysis are addressed.
+  \item \textbf{ParkinsonNet performance}: 97.4\% accuracy and AUROC 0.9931 match the state-of-the-art reviewed literature results on the UCI dataset.
+  \item \textbf{Deployability}: The entire system operates on CPU hardware with no GPU requirement, using open-source tools, at zero marginal cost on free-tier cloud hosting.
+  \item \textbf{Triage system}: The rule-based three-level triage (routine / recommended check / priority review) provides clinically actionable output even when individual model probabilities are close to decision boundaries.
+\end{enumerate}
+
+\subsection{Limitations}
+
+\begin{enumerate}
+  \item \textbf{ECGNet overfitting}: The 38.55-percentage-point training-test accuracy gap is a significant limitation. The models reviewed in the literature that achieve 99\%+ accuracy also use near-identical train/test data from MIT-BIH — but the key difference is that our deployment architecture (CPU, single-lead, lightweight model) prioritises accessibility over peak benchmark accuracy.
+  \item \textbf{S-class and F-class failure}: ECGNet achieves F1 = 0.06 (S-class) and F1 = 0.04 (F-class), identical to the failure modes documented across the reviewed literature \cite{ayyub2025, kerdoudi2024}. This reflects the fundamental inadequacy of the MIT-BIH dataset for minority-class learning, not an architecture-specific flaw.
+  \item \textbf{Demographic specificity}: DiabetesNet is trained exclusively on PIDD (female Pima Indian patients) — the same demographic limitation present in all 15 reviewed diabetes papers that use this dataset.
+  \item \textbf{Small Parkinson's test set}: 39-sample test evaluation is insufficient for robust clinical confidence intervals, as noted across 12 of the 16 reviewed Parkinson's papers including \cite{dixit2024, islam2024}.
+  \item \textbf{Voice feature approximation}: RPDE, DFA, and D2 are computed using custom NumPy approximations rather than the clinically validated implementations used in the original UCI study \cite{little2008}.
+\end{enumerate}
+

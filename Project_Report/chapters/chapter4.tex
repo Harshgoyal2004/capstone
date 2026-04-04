@@ -1,0 +1,122 @@
+\chapter{\MakeUppercase{System Design}}
+\justifying
+
+\section{System Architecture}
+
+The AI Health Screening Assistant follows a client-server architecture comprising three distinct layers: a Streamlit-based frontend, a FastAPI-based backend orchestration engine, and three PyTorch inference modules. Figure 4.1 presents the high-level system architecture.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/system_arch.pdf}
+	\caption{High-Level System Architecture of the AI Health Screening Assistant}
+	\label{fig:sysarch}
+\end{figure}
+
+The system is designed around a novel \textbf{double-pass \ac{llm}} pattern. In the first pass, the Gemini \ac{llm} conducts a structured medical intake interview, collecting patient data conversationally and terminating with a structured \texttt{<MODEL\_INPUT>} XML block. The backend intercepts this block, parses it, and routes the data to the appropriate inference modules. After all three models have produced risk scores, the backend constructs a \texttt{<MODEL\_OUTPUT>} block and initiates a second pass to Gemini, which interprets the quantitative results and generates an empathetic patient-facing explanation.
+
+This architecture ensures that \textbf{the \ac{llm} never fabricates risk probabilities} — all numerical predictions originate exclusively from the PyTorch models.
+
+\subsection{Frontend (Streamlit)}
+
+The Streamlit frontend (\texttt{ui/streamlit\_app.py}) provides:
+\begin{itemize}
+	\item A chat interface using \texttt{st.chat\_message} and \texttt{st.chat\_input}
+	\item A sidebar with ECG file upload (CSV) and voice file upload (WAV/MP3) widgets
+	\item Real-time display of screening status (pending, in progress, completed)
+	\item Risk badge display showing cardiac, metabolic, and motor risk levels with colour coding
+	\item Triage level indicator (routine / recommended check / priority review)
+\end{itemize}
+
+\subsection{Backend (FastAPI)}
+
+The FastAPI backend (\texttt{app.py}) exports four endpoints and pre-loads all three \ac{dl} models at startup via the \texttt{@app.on\_event("startup")} handler, ensuring zero cold-start inference latency for subsequent requests.
+
+The \textbf{orchestration flow} within the \texttt{/chat} endpoint is:
+\begin{enumerate}
+	\item Append upload status notes to the most recent user message (preventing the \ac{llm} from re-asking for already-uploaded files)
+	\item Call the Gemini \ac{llm} via \texttt{chat/groq\_client.py}
+	\item Scan the response for \texttt{<MODEL\_INPUT>} using regex
+	\item If detected, parse the block, run all three inference modules, build \texttt{<MODEL\_OUTPUT>}
+	\item Make a second Gemini call with the model output for patient-facing explanation
+	\item Return the final explanation and model results to the frontend
+\end{enumerate}
+
+\subsection{Inference Modules}
+
+Each inference module (\texttt{inference/heart.py}, \texttt{inference/diabetes.py}, \texttt{inference/parkinson.py}) is self-contained, implementing both the model architecture class and the \texttt{predict()} function. Models are cached as module-level singletons and loaded lazily on first call (or at startup). All modules use PyTorch's \texttt{torch.no\_grad()} context for inference to suppress gradient computation.
+
+\subsection{LLM Integration (Gemini)}
+
+The \texttt{chat/groq\_client.py} module implements the Gemini client with:
+\begin{itemize}
+	\item A medical system prompt encoding data collection protocol, safety guardrails, and output format specification
+	\item A three-model fallback chain: gemini-1.5-flash $\rightarrow$ gemini-1.5-pro $\rightarrow$ gemini-2.0-flash
+	\item A secondary HuggingFace fallback using \texttt{Qwen/Qwen2.5-72B-Instruct} when all Gemini models fail
+\end{itemize}
+
+\section{Detailed Design}
+
+\subsection{ECG Signal Processing Pipeline}
+
+The ECG preprocessing pipeline, implemented in \texttt{inference/heart.py}, consists of four stages:
+
+\begin{enumerate}
+	\item \textbf{Bandpass Filtering}: A 4th-order Butterworth bandpass filter (passband 0.5–40 Hz) is applied using \texttt{scipy.signal.butter} and \texttt{filtfilt} (zero-phase filtering). This removes baseline wander (below 0.5 Hz) and high-frequency noise and muscle artefacts (above 40 Hz).
+
+	\item \textbf{R-Peak Detection}: \texttt{scipy.signal.find\_peaks} is applied with a minimum inter-peak distance of 180 samples (0.5 seconds at 360 Hz) and an adaptive height threshold of $\mu + 0.5\sigma$ (mean plus half a standard deviation of the filtered signal). If no peaks are detected, parameters are relaxed; if still empty, the signal midpoint is used as a fallback.
+
+	\item \textbf{Beat Segmentation}: For each detected R-peak, a fixed window is extracted: 108 samples pre-R (0.3 s) and 144 samples post-R (0.4 s), yielding a 252-sample beat window. Beats at signal boundaries (insufficient pre/post samples) are discarded.
+
+	\item \textbf{Batch Inference}: All extracted beats are stacked into a batch tensor of shape (B, 1, 252) and passed through ECGNet. Per-beat softmax probabilities are averaged across all beats. The abnormality probability is defined as $1 - P(\text{Normal})$.
+\end{enumerate}
+
+\subsection{Voice Feature Extraction Pipeline}
+
+The voice analysis pipeline, implemented in \texttt{inference/parkinson.py}, extracts all 22 UCI-compatible biomarkers from a WAV file using librosa:
+
+\begin{table}[h!]
+\centering
+\caption{Voice Feature Extraction Methods}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Feature Group} & \textbf{Method} & \textbf{Features} \\
+\hline
+Fundamental Frequency & pYIN (librosa.pyin) & Fo, Fhi, Flo \\
+Frequency Perturbation & Period-to-period analysis & Jitter(\%), Jitter(Abs), RAP, PPQ, DDP \\
+Amplitude Perturbation & RMS amplitude analysis & Shimmer, Shimmer(dB), APQ3, APQ5, APQ, DDA \\
+Noise Ratios & Harmonic separation & NHR, HNR \\
+Nonlinear Dynamics & Custom NumPy & RPDE, DFA, D2 \\
+Pitch Entropy & F0 distribution & spread1, spread2, PPE \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Diabetes Feature Normalisation}
+
+Diabetes features collected via the \ac{llm} are normalised using pre-computed dataset statistics (stored as NumPy arrays in \texttt{inference/diabetes.py}):
+
+\begin{equation}
+	x^{\prime}_i = \frac{x_i - \mu_i}{\sigma_i + \epsilon}
+\end{equation}
+
+where $\mu_i$ and $\sigma_i$ are the training-set mean and standard deviation of feature $i$, and $\epsilon = 10^{-8}$ prevents division by zero.
+
+\subsection{Triage Logic}
+
+Risk levels from the three models are combined using a rule-based triage classifier:
+
+\begin{enumerate}
+	\item If any single risk is \textit{high} (cardiac) or \textit{elevated} (metabolic) or \textit{high} (motor) $\rightarrow$ \texttt{priority\_review}
+	\item Else if two or more risks are \textit{moderate/borderline/mild} $\rightarrow$ \texttt{recommended\_check}
+	\item Otherwise $\rightarrow$ \texttt{routine}
+\end{enumerate}
+
+\subsection{Data Flow Diagram}
+
+The complete data flow from user input to screening report is:
+
+\[\text{User Chat} \rightarrow \text{Gemini (Pass 1)} \rightarrow \texttt{<MODEL\_INPUT>} \rightarrow \text{Parser}\]
+\[\rightarrow \text{ECGNet} + \text{DiabetesNet} + \text{ParkinsonNet} \rightarrow \texttt{<MODEL\_OUTPUT>}\]
+\[\rightarrow \text{Gemini (Pass 2)} \rightarrow \text{Patient-Facing Explanation} \rightarrow \text{Streamlit UI}\]
+

@@ -1,0 +1,93 @@
+\chapter{\MakeUppercase{Project Implementation}}
+\justifying
+
+\section{Development Environment}
+
+All model training was carried out on Google Colab (Python 3.10, NVIDIA T4 GPU) using the \texttt{models.ipynb} Jupyter notebook. The backend and frontend were developed locally on macOS using a Python virtual environment (\texttt{venv}). Git was used for version control, with the repository hosted at \texttt{github.com/Harshgoyal2004/capstone}.
+
+The project structure is as follows:
+\begin{verbatim}
+capstone/
+├── app.py                     # FastAPI backend
+├── requirements.txt           # 14 Python dependencies
+├── Heart-model.pt             # ECGNet weights (~2.08 MB)
+├── Diabetes-model.pt          # DiabetesNet weights (~8.5 KB)
+├── Parkinson-model.pt         # ParkinsonNet weights (~20 KB)
+├── models.ipynb               # Training notebook (all 3 models)
+├── inference/
+│   ├── heart.py               # ECGNet + ECG signal processing
+│   ├── diabetes.py            # DiabetesNet + feature normalisation
+│   └── parkinson.py           # ParkinsonNet + voice feature extraction
+├── chat/
+│   ├── groq_client.py         # Gemini LLM client + system prompt
+│   └── parser.py              # MODEL_INPUT/OUTPUT parsing + triage
+└── ui/
+    └── streamlit_app.py       # Streamlit chat UI
+\end{verbatim}
+
+\section{Key Implementation Details}
+
+\subsection{FastAPI Backend (\texttt{app.py})}
+
+The FastAPI application is configured with \ac{cors} middleware allowing all origins, enabling the Streamlit frontend to communicate across origins during local development. The startup event pre-loads all three models using each module's \texttt{\_get\_model()} singleton function, logging load status to standard output.
+
+The \texttt{/chat} endpoint implements the double-pass \ac{llm} architecture. A critical implementation detail is the injection of upload status notes into the most recent user message:
+
+\begin{verbatim}
+if request.ecg_file_path:
+    status_notes.append("The user has already uploaded an ECG file.")
+\end{verbatim}
+
+This instructs the \ac{llm} not to ask repeatedly for files already provided, and to mark them as \texttt{"provided"} in the \texttt{<MODEL\_INPUT>} block.
+
+\subsection{ECG Inference (\texttt{inference/heart.py})}
+
+The \texttt{predict()} function handles CSV files with either single or multiple columns (always using the first column). Signal resampling from non-360 Hz sources is supported via \texttt{scipy.signal.resample}. The model output is risk-stratified using the empirically chosen thresholds: Low ($< 0.35$), Moderate ($0.35$–$0.70$), High ($\geq 0.70$).
+
+\subsection{Voice Feature Extraction (\texttt{inference/parkinson.py})}
+
+The pYIN F0 estimator returns a voiced/unvoiced flag array alongside pitch values. Only voiced frames are used for computing jitter and shimmer statistics, to avoid contamination from silence or unvoiced consonants. Nonlinear features (RPDE, DFA, D2) are computed using custom NumPy implementations of the Grassberger-Procaccia algorithm and detrended fluctuation analysis.
+
+\subsection{LLM System Prompt Engineering (\texttt{chat/groq\_client.py})}
+
+The system prompt is structured in five sections: Role Definition, Data Collection Protocol (with exact \texttt{<MODEL\_INPUT>} format), Result Explanation Guidelines, and Safety Rules. The temperature is set to $0.7$ to balance response coherence with natural conversational variation. The \texttt{max\_output\_tokens} is capped at 2048, sufficient for both intake and explanation responses.
+
+\subsection{Streamlit Frontend (\texttt{ui/streamlit\_app.py})}
+
+The frontend maintains persistent session state (\texttt{st.session\_state}) for:
+\begin{itemize}
+	\item Chat message history
+	\item Uploaded ECG and voice file paths
+	\item Latest model results (risk levels, probabilities, triage)
+\end{itemize}
+
+Risk badges are rendered using custom HTML/CSS within \texttt{st.markdown()} calls, providing colour-coded displays (green for low/stable, yellow for moderate/borderline/mild, red for high/elevated). A medical disclaimer modal is displayed on first load.
+
+\subsection{Deployment (\texttt{render.yaml})}
+
+The backend is configured for deployment on Render using \texttt{render.yaml}, specifying a Docker-based service with the \texttt{Dockerfile} at the repository root. The Dockerfile installs all dependencies from \texttt{requirements.txt} and launches the FastAPI server on port 8000 using Uvicorn.
+
+\section{Challenges and Solutions}
+
+\begin{table}[h!]
+\centering
+\caption{Key Implementation Challenges and Solutions}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|p{5cm}|p{6cm}|}
+\hline
+\textbf{Challenge} & \textbf{Description} & \textbf{Solution} \\
+\hline
+ECG class imbalance & MIT-BIH has $\sim$72\% Normal beats; rare classes (S, F) severely under-represented & WeightedRandomSampler + Focal Loss; accepted lower S/F F1 as a known limitation \\
+\hline
+LLM fabrication risk & LLM may generate plausible but fabricated risk probabilities & Double-pass architecture: \ac{llm} only interprets MODEL\_OUTPUT, never generates risk numbers \\
+\hline
+Gemini API rate limits & Free tier quota exceeded during intensive testing & Three-model fallback chain (1.5-flash $\rightarrow$ 1.5-pro $\rightarrow$ 2.0-flash) with 2s delays \\
+\hline
+Voice feature alignment & UCI dataset features must exactly match librosa-computed features for correct normalisation & Feature-by-feature cross-validation against the original UCI dataset statistics \\
+\hline
+Model cold start latency & Loading PyTorch models on each request adds unacceptable latency & Module-level singleton caching + startup event pre-loading \\
+\hline
+\end{tabular}}
+\end{table}
+

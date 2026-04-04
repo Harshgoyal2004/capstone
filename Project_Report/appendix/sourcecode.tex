@@ -1,0 +1,97 @@
+\begin{center}
+	{\Large \textbf{Appendix A}}-\vspace*{0.5 cm}
+	{\Large \textbf{Key Source Code Listings}}
+	
+\end{center}
+
+\paragraph{Listing A.1: ECGNet Model Architecture (\texttt{inference/heart.py})}
+\begin{lstlisting}[language=Python, caption={ECGNet Multi-Scale Attention CNN Architecture}]
+class ChannelAttention(nn.Module):
+    def __init__(self, channels, r=8):
+        super().__init__()
+        self.avg = nn.AdaptiveAvgPool1d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channels, channels // r),
+            nn.ReLU(),
+            nn.Linear(channels // r, channels),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        b, c, t = x.size()
+        y = self.avg(x).view(b, c)
+        y = self.fc(y).view(b, c, 1)
+        return x * y
+
+
+class MultiScaleBlock(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super().__init__()
+        self.conv3 = nn.Conv1d(in_ch, out_ch, 3, padding=1)
+        self.conv5 = nn.Conv1d(in_ch, out_ch, 5, padding=2)
+        self.conv7 = nn.Conv1d(in_ch, out_ch, 7, padding=3)
+        self.bn = nn.BatchNorm1d(out_ch * 3)
+        self.att = ChannelAttention(out_ch * 3)
+
+    def forward(self, x):
+        x = torch.cat([self.conv3(x), self.conv5(x),
+                       self.conv7(x)], dim=1)
+        x = F.relu(self.bn(x))
+        return self.att(x)
+
+
+class ECGNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.block1 = MultiScaleBlock(1, 32)
+        self.pool1  = nn.MaxPool1d(2)
+        self.block2 = MultiScaleBlock(96, 64)
+        self.pool2  = nn.MaxPool1d(2)
+        self.block3 = MultiScaleBlock(192, 128)
+        self.gap    = nn.AdaptiveAvgPool1d(1)
+        self.fc     = nn.Linear(384, 5)
+
+    def forward(self, x):
+        x = self.pool1(self.block1(x))
+        x = self.pool2(self.block2(x))
+        x = self.block3(x)
+        x = self.gap(x).squeeze(-1)
+        return self.fc(x)
+\end{lstlisting}
+
+\paragraph{Listing A.2: Triage Logic (\texttt{chat/parser.py})}
+\begin{lstlisting}[language=Python, caption={Automated Triage Classification Function}]
+def determine_triage(cardiac_risk, metabolic_risk, motor_risk):
+    high_levels     = {'high', 'elevated'}
+    moderate_levels = {'moderate', 'borderline', 'mild'}
+    risks = [cardiac_risk.lower(), metabolic_risk.lower(),
+             motor_risk.lower()]
+
+    if any(r in high_levels for r in risks):
+        return "priority_review"
+    moderate_count = sum(1 for r in risks if r in moderate_levels)
+    if moderate_count >= 2:
+        return "recommended_check"
+    return "routine"
+\end{lstlisting}
+
+\paragraph{Listing A.3: DiabetesNet Architecture (\texttt{inference/diabetes.py})}
+\begin{lstlisting}[language=Python, caption={DiabetesNet Tabular Deep Neural Network}]
+class DiabetesNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(8, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(32, 16),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(16, 1)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+\end{lstlisting}
+

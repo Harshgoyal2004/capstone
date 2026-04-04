@@ -1,0 +1,150 @@
+\chapter{\MakeUppercase{Project Description and Goals}}
+\justifying
+
+\section{Literature Review}
+
+A systematic review of 49 research papers was conducted across three disease domains — cardiac arrhythmia, diabetes mellitus, and Parkinson's disease — to identify the state of the art, assess existing approaches, and identify the research gaps that motivate this project. The papers are organised by domain below.
+
+% ──────────────────────────────────────────────────────────────────────
+\subsection{Cardiac Arrhythmia Detection using ECG}
+% ──────────────────────────────────────────────────────────────────────
+
+\textbf{Review of existing methods.}
+Ayyub et al. \cite{ayyub2025} conducted a systematic review of 219 papers on AI-based arrhythmia detection, noting that reported accuracies of individual models range from 50\% to 99.9\%, but the models are overwhelmingly evaluated on a single dataset (MIT-BIH) and suffer from severe class imbalance, particularly for rare beat classes (S, F).
+
+Several papers have proposed one-dimensional \ac{cnn} architectures as the dominant approach. Guhdar et al. \cite{guhdar2024} proposed a 1D-CNN with channel and spatial attention achieving 99.3\% accuracy on MIT-BIH (5-class AAMI). Kavitha and Shakkeera \cite{kavitha2024} achieved 99.5\% with an explainable 1D-CNN using LIME/SHAP, but noted that the interpretability methods are computationally expensive and have not been validated by clinicians. Kerdoudi et al. \cite{kerdoudi2024} achieved 99.5\% with a multi-head attention CNN-BiLSTM architecture, and Venkatesh et al. \cite{venkatesh2026} proposed ASNet (Attention-Stacked Network) achieving 99.2\%.
+
+Multi-scale and multi-modal architectures have also been explored. Khatar et al. \cite{khatar2024} proposed GAF-GradCAM, which encodes ECG signals as Gramian Angular Field images and performs dynamic weighted fusion, achieving 99.4\% accuracy, but at the cost of increased memory and computational requirements. Mahajan et al. \cite{mahajan2024} integrated CNN, GNN, and BiLSTM for multi-lead ECG achieving 99.1\%, but requiring multi-lead input which is less accessible. Tang et al. \cite{tang2024} designed LEPENN, a lightweight model with only $\sim$15K parameters achieving 98.9\%, specifically targeting embedded deployment. Moaven and Abbaszadeh \cite{moaven2026} proposed a Hybrid PCA-PINN framework achieving 98.7\%, requiring domain-specific physical constraint design.
+
+Transformer-based approaches have emerged as a second major direction. Dutenhefner et al. \cite{dutenhefner2026} proposed a Hybrid Hierarchical Transformer combining CNN and Transformer encoders achieving $\sim$97\% on MIT-BIH but requiring 12-lead ECG data. Liu et al. \cite{liu2024} developed a Transformer-Convolutional network with Grad-CAM achieving 98.2\% on MIT-BIH but with high computational requirements. Duranay et al. \cite{duranay2024} applied a Vision Transformer to ECG images achieving 97.3\%, but highlighted that image conversion loses temporal resolution.
+
+For patient-specific classification, Prakash and Atef \cite{prakash2024} demonstrated 99.3\% accuracy with a lightweight CNN-LSTM capturing local and long-term dependencies, but noted that patient-specific models require initial labelled data for each new patient.
+
+Sleep-apnea-related ECG analysis was explored by Hou et al. \cite{hou2024sleep} and Hou et al. \cite{hou2024tho}, both achieving $\sim$95\% on the Apnea-ECG database using CNN-Transformer-LSTM hybrids, though these focus on sleep apnea rather than arrhythmia classification.
+
+\textbf{Key limitations identified across ECG literature:}
+\begin{itemize}
+  \item All high-performing models (99\%+) are trained and tested on the same benchmark (MIT-BIH), with no cross-dataset evaluation.
+  \item Rare \ac{aami} classes — Supraventricular (S) and Fusion (F) — consistently achieve F1-scores below 0.20 due to extreme class imbalance ($<$2\% of beats).
+  \item Transformer and multi-lead models are computationally infeasible for CPU deployment.
+  \item No existing system integrates ECG arrhythmia detection within a conversational health screening platform.
+  \item High accuracy on MIT-BIH does not guarantee clinical utility due to train-test data leakage within the same patient cohort.
+\end{itemize}
+
+% ──────────────────────────────────────────────────────────────────────
+\subsection{Diabetes Mellitus Prediction}
+% ──────────────────────────────────────────────────────────────────────
+
+\textbf{Review of existing methods.}
+Diabetes prediction from clinical biomarkers has been extensively studied using the Pima Indians Diabetes Dataset (PIDD). Classical ensemble and optimisation-based approaches dominate the literature.
+
+Daza et al. \cite{daza2024} used a multi-level stacking ensemble (RF, SVM, NB, KNN, LR as level-1; Gradient Boosting as meta-learner) achieving 82.8\% on PIDD and 85.3\% on the Frankfurt Hospital dataset. Reza et al. \cite{reza2024} used a similar stacking ensemble achieving 81.2\% on PIDD. Gollapalli et al. \cite{gollapalli2022} proposed a stacking ensemble on a Saudi Arabian 3-class dataset achieving 94.48\%, but on a population-specific dataset not publicly available. Elgendy et al. \cite{elgendy2025} proposed a dual-stage explainable ensemble using SHAP feature selection and stacking (RF, XGBoost, LightGBM, SVM) achieving 82.5\% on PIDD and 86.1\% on BRFSS. Phan et al. \cite{phan2025} proposed REMED-T2D with Bayesian hyperparameter optimisation, achieving 83.9\% on PIDD, 98.5\% on the Early Stage Diabetes dataset, and 86.2\% on BRFSS.
+
+Metaheuristic feature selection methods have been paired with classical classifiers. Siva Shankar and Manikandan \cite{sivashankar2019} used Grey Wolf Optimization (GWO) with Fuzzy Logic achieving 83.12\%. Vekkot et al. \cite{vekkot2025} extended GWO with SHAP explainability achieving 82.5\%. Sirmayanti et al. \cite{sirmayanti2024} proposed an autophagy-inspired GWO variant achieving 83.7\%. Karuppasamy et al. \cite{karuppasamy2025} combined PSO and Genetic Algorithms (PG-S approach) achieving 84.5\%. Naskar et al. \cite{naskar2025} proposed a Guided Population-based Genetic Algorithm achieving 79.2\% on PIDD. Basith et al. \cite{basith2024} used Particle Swarm Optimization for feature fusion achieving 88.3\% on PIDD.
+
+Vasuki et al. \cite{vasuki2024} built a Knowledge-aware Attentional Neural Network optimised with WV-GWO achieving 87.3\% on diabetes prediction. Bhagat and Maulik \cite{bhagat2024} added Blockchain to a stacked ensemble (StaBloCare) achieving 86.4\% but with significant infrastructure overhead. Wang and Nguyen \cite{wang2024} proposed a Wasserstein Autoencoder for synthetic tabular data generation, improving downstream classification by 2\%--8\% through data augmentation. Chen et al. \cite{chen2026} used Enhanced Adaptive Differential Evolution for feature selection achieving 84.2\% with SVM.
+
+\textbf{Key limitations identified across diabetes literature:}
+\begin{itemize}
+  \item All studies are trained and tested on the PIDD (768 samples, female patients of Pima Indian heritage aged $\geq$21), a small, highly demographic-specific dataset with known bias.
+  \item Accuracies plateau below 90\%, with the best published results ranging from 81\%--88\% on PIDD. No paper significantly surpasses this ceiling.
+  \item No existing system collects the 8 diabetes biomarkers \textit{conversationally} through natural language dialogue; all prior systems require structured form-based data entry.
+  \item Metaheuristic approaches (GWO, GA, PSO) add significant computational overhead with only marginal accuracy improvement over simpler methods.
+  \item The diabetic class (positive) consistently suffers from lower recall, meaning many diabetic patients are missed — a critical failure mode for a screening tool.
+\end{itemize}
+
+% ──────────────────────────────────────────────────────────────────────
+\subsection{Parkinson's Disease Detection}
+% ──────────────────────────────────────────────────────────────────────
+
+\textbf{Review of existing methods.}
+Voice-based Parkinson's detection builds on the seminal UCI Parkinson's dataset introduced by Little et al. \cite{little2008}, which established 22 acoustic biomarkers (jitter, shimmer, HNR, nonlinear dynamics) as powerful discriminators of PD.
+
+Guatelli et al. \cite{guatelli2024} applied Extreme Learning Machine (ELM) with random weight neural networks to Mel spectrograms of voice recordings, achieving 96.5\% accuracy. Palakayala and Kuppusamy \cite{palakayala2024} combined a Deep Structured Neural Network with a Genetic Algorithm for feature optimisation, achieving 97.6\% binary and 93.7\% multi-class accuracy. Khafaga et al. \cite{khafaga2024} proposed HGGO-PSO (hybrid metaheuristic) with SVM achieving 97.4\% on UCI. Chakraborty et al. \cite{chakraborty2025} achieved 97.4\% with voice alone, and 98.6\% with multi-modal fusion (voice + gait + handwriting).
+
+Beyond voice, alternative modalities have been explored. Majhi et al. \cite{majhi2024} applied transfer learning with InceptionV3 to spiral/wave drawing images achieving 89.75\%. Hammouda et al. \cite{hammouda2024} applied ResNet-based transfer learning to time-series imaging from wrist-worn IMU sensors achieving F1 = 0.986. Wang et al. \cite{wang2024point} developed PointExplainer, a point cloud neural network for 3D motion capture data achieving 92.3\%. Gao et al. \cite{gao2024} applied multi-scale spatio-temporal networks with topological features from EEG achieving 93.8\%. Soylu et al. \cite{soylu2025} developed a CNN-RNN hybrid for multi-disease neurological detection including PD, achieving 96.8\% accuracy.
+
+Speech signal analysis is reviewed by Rusz et al. \cite{rusz2024}, noting that digital speech biomarkers can detect PD at prodromal stages (65\%--85\% accuracy). Peixoto et al. \cite{peixoto2024} used multi-agent LLM collaboration (GPT-4, Med-PaLM) for multimodal PD diagnosis achieving 89.5\%, but relying on proprietary APIs and non-public clinical data. Wagdarikar and Jagtap \cite{wagdarikar2025} proposed a two-way voice feature representation (TWVFR) with 1D+2D DCNN fusion achieving 98.33\% on the Saarbruecken Voice Database.
+
+Review papers provide broader perspective: Islam et al. \cite{islam2024} reviewed ML/DL for PD detection from handwriting and voice (75\%--99\% across studies); Chandru et al. \cite{chandru2024} reviewed AI for neurodegenerative diseases; Zhao et al. \cite{zhao2024} surveyed AI-enabled PD detection via multimodal data; Dixit et al. \cite{dixit2024} provided a comprehensive review across methodologies, datasets, and clinical applications; Sigcha et al. \cite{sigcha2023} systematically reviewed DL + wearable sensors for PD (80\%--99\%); Lee and Lu \cite{lee2025} reviewed clinical interventions (DBS, MRgFUS) and Shi et al. \cite{shi2026} reviewed MOF/COF drug delivery with AI for PD treatment.
+
+\textbf{Key limitations identified across Parkinson's literature:}
+\begin{itemize}
+  \item The UCI Parkinson's dataset contains only 195 recordings from 31 subjects (23 PD, 8 healthy) — grossly insufficient for statistically robust evaluation.
+  \item High accuracy (97\%+) on this dataset is achievable with almost any modern classifier, suggesting subject-level overfitting rather than true generalisation.
+  \item Multi-modal approaches (EEG, IMU, point cloud) require specialised, expensive hardware unavailable to most users.
+  \item LLM-based approaches \cite{peixoto2024} depend on proprietary APIs, cloud processing of sensitive voice data, and hallucination-prone pipelines with no quantitative model backing.
+  \item There is no deployable system that extracts voice biomarkers from a simple WAV file upload, runs them through a DNN, and delivers results conversationally in patient-friendly language.
+\end{itemize}
+
+% ──────────────────────────────────────────────────────────────────────
+\section{Research Gap}
+% ──────────────────────────────────────────────────────────────────────
+
+Based on the systematic review above, the following specific, interconnected research gaps were identified — each of which is directly addressed by this project:
+
+\paragraph{Gap 1: No multi-disease early screening platform exists.}
+All 49 reviewed papers focus on a \textit{single} disease domain. No system simultaneously screens for cardiac arrhythmia, diabetes, and Parkinson's disease in a single patient session. This forces patients to seek out multiple isolated tools, reducing the likelihood of comprehensive early-stage risk assessment.
+\textbf{$\rightarrow$ Addressed by:} The AI Health Screening Assistant integrates three independent PyTorch models (ECGNet, DiabetesNet, ParkinsonNet) that run simultaneously in a single pipeline, producing a unified multi-domain risk report.
+
+\paragraph{Gap 2: Conversational data collection is completely absent.}
+Every reviewed system requires structured form-based data entry. The 8 diabetes biomarkers (glucose, blood pressure, BMI, etc.) must be entered manually by the user in a rigid form. This creates a barrier for non-technical users and reduces data quality.
+\textbf{$\rightarrow$ Addressed by:} The Google Gemini \ac{llm} conducts a natural language medical intake interview, collecting all required data through guided conversation (2--3 questions per turn), explaining the purpose of each biomarker in lay language.
+
+\paragraph{Gap 3: LLM hallucination of medical risk values is a patient safety risk.}
+Peixoto et al. \cite{peixoto2024} demonstrated LLM-based PD diagnosis, but the system relies on LLMs to generate risk assessments — creating a direct risk of hallucination of clinical values. No reviewed system architecturally prevents the LLM from fabricating probabilities.
+\textbf{$\rightarrow$ Addressed by:} The double-pass \ac{llm} architecture strictly separates the LLM's role (data collection and result interpretation) from the quantitative models' role (risk probability generation). The LLM \textit{never} generates risk numbers; all probabilities come exclusively from PyTorch inference.
+
+\paragraph{Gap 4: ECG screening is confined to high-complexity models or multi-lead hardware.}
+While high-performing ECG models exist (Transformer, GNN-based), they require multi-lead input \cite{mahajan2024}, significant GPU compute \cite{liu2024}, or proprietary image conversion pipelines \cite{khatar2024}. No efficient single-lead, CPU-deployable arrhythmia classifier exists within a web application.
+\textbf{$\rightarrow$ Addressed by:} ECGNet is a lightweight ($\sim$487K parameters) Multi-Scale Attention 1D-CNN that operates on single-lead CSV ECG uploads, runs on CPU, and is deployed within the FastAPI backend.
+
+\paragraph{Gap 5: Voice-based Parkinson's screening is not accessible to ordinary users.}
+EEG-based models \cite{gao2024} require clinical EEG equipment. IMU wearable approaches \cite{hammouda2024} require specialised sensors. 3D motion capture \cite{wang2024point} is impractical. Existing voice models evaluate on the UCI dataset but are not deployed in any accessible tool.
+\textbf{$\rightarrow$ Addressed by:} ParkinsonNet accepts any WAV recording through a browser upload widget. The librosa-based pipeline extracts all 22 UCI-compatible voice biomarkers in real-time, enabling Parkinson's risk assessment from any microphone recording.
+
+\paragraph{Gap 6: No explainable, patient-facing result delivery in lay language.}
+Of the 49 reviewed papers, none provide patient-facing communication of model outputs. Clinician-facing explainability tools (LIME \cite{kavitha2024}, SHAP \cite{elgendy2025}, Grad-CAM \cite{liu2024}) exist, but they produce technical visualisations unsuitable for lay users, and none are integrated into deployable web applications.
+\textbf{$\rightarrow$ Addressed by:} After PyTorch inference, the system sends a \texttt{<MODEL\_OUTPUT>} block back to Gemini, which generates an empathetic, non-diagnostic explanation calibrated to the patient's literacy level — with specific action recommendations based on triage level.
+
+% ──────────────────────────────────────────────────────────────────────
+\section{Objectives}
+% ──────────────────────────────────────────────────────────────────────
+
+The primary objectives of this project, directly motivated by the identified research gaps, are:
+
+\begin{enumerate}
+  \item To design and implement a multi-disease \ac{ai} health screening system (Gap 1) covering cardiac arrhythmia, diabetes mellitus, and Parkinson's disease simultaneously.
+  \item To develop a conversational medical intake interface (Gap 2) using Google Gemini \ac{llm} that collects patient data through natural dialogue without form-based data entry.
+  \item To architect and implement a double-pass \ac{llm} pipeline (Gap 3) that strictly prevents LLM hallucination of medical risk probabilities, with all quantitative values generated by PyTorch models.
+  \item To train and deploy ECGNet (Gap 4), a lightweight Multi-Scale Attention 1D-CNN for CPU-deployable single-lead ECG arrhythmia classification.
+  \item To implement an end-to-end voice feature extraction pipeline (Gap 5) extracting all 22 UCI-compatible biomarkers from WAV file uploads for Parkinson's risk assessment.
+  \item To deliver screening results in patient-friendly, lay language (Gap 6) with automated triage classification and clinically appropriate action recommendations.
+\end{enumerate}
+
+% ──────────────────────────────────────────────────────────────────────
+\section{Problem Statement}
+% ──────────────────────────────────────────────────────────────────────
+
+Despite 49 published research papers demonstrating strong individual machine learning models for cardiac arrhythmia detection, diabetes prediction, and Parkinson's disease assessment, \textit{no accessible, conversational system exists that simultaneously screens a patient across all three domains from a single interaction}. Existing single-disease tools require structured data entry, operate in isolation, produce outputs only interpretable by clinicians, and — in the emerging category of LLM-based tools — risk fabricating clinical risk values through hallucination.
+
+This project addresses this problem by building an end-to-end \ac{ai} health screening assistant that:
+(1) collects multi-domain patient data conversationally via a Gemini \ac{llm};
+(2) runs three purpose-trained PyTorch neural networks simultaneously for cardiac, metabolic, and motor risk assessment;
+(3) prevents LLM fabrication through a strictly structured two-pass pipeline;
+and (4) delivers patient-facing, empathetic, non-diagnostic results with automated triage — closing the gap between published ML research and accessible clinical screening tools.
+
+% ──────────────────────────────────────────────────────────────────────
+\section{Project Plan}
+% ──────────────────────────────────────────────────────────────────────
+
+The project was executed across the academic year 2025--2026 in five phases:
+
+\begin{enumerate}
+  \item \textbf{Phase 1 — Literature Survey and Dataset Acquisition} (Weeks 1--4): Review of all 49 research papers across three disease domains; acquisition of MIT-BIH Arrhythmia Database, Pima Indians Diabetes Dataset, and UCI Parkinson's Dataset; gap analysis and system design.
+  \item \textbf{Phase 2 — Model Training} (Weeks 5--10): Preprocessing pipelines, ECGNet/DiabetesNet/ParkinsonNet architecture design, training on Google Colab T4 GPU, evaluation and hyperparameter tuning.
+  \item \textbf{Phase 3 — Backend Development} (Weeks 11--15): FastAPI orchestration engine, three inference modules (\texttt{heart.py}, \texttt{diabetes.py}, \texttt{parkinson.py}), Gemini \ac{llm} integration with double-pass architecture.
+  \item \textbf{Phase 4 — Frontend Development and Integration} (Weeks 16--18): Streamlit \ac{ui}, file upload integration, risk badge display, triage indicator, end-to-end system testing.
+  \item \textbf{Phase 5 — Evaluation and Report Writing} (Weeks 19--22): Performance benchmarking against literature, integration testing, error analysis, capstone documentation.
+\end{enumerate}
+

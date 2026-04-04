@@ -1,0 +1,62 @@
+\chapter{\MakeUppercase{Conclusion and Further Enhancements}}
+\justifying
+
+\section{Conclusion}
+
+This project has successfully designed, implemented, and evaluated an \ac{ai}-powered conversational health screening platform that simultaneously assesses cardiac arrhythmia, diabetes mellitus, and Parkinson's disease risk through a unified web interface. The system makes several notable contributions:
+
+\begin{enumerate}
+	\item \textbf{Novel Double-Pass \ac{llm} Architecture}: The closed-loop \ac{llm}-\ac{ml} pipeline, in which Google Gemini collects structured data, triggers PyTorch inference, and subsequently interprets quantitative model outputs, represents a novel approach to \ac{llm}-mediated clinical screening that prevents hallucination of medical risk values.
+
+	\item \textbf{Multi-Disease Screening in a Single Session}: The integration of three independent disease domains — cardiac, metabolic, and motor — into a single conversational session is a unique capability not present in any currently available public health tool.
+
+	\item \textbf{Production-Grade Deployment}: The system demonstrates that a full-stack \ac{ai} application combining \ac{dl} inference, signal processing, \ac{llm} orchestration, and a polished web \ac{ui} can be built and deployed as a working prototype by an undergraduate engineering team.
+
+	\item \textbf{Research-Practice Bridge}: By packaging well-established research models (ECGNet, DiabetesNet, ParkinsonNet) into a deployable application with a patient-friendly interface, the project bridges the gap between research artifacts and practical health technology.
+\end{enumerate}
+
+The three \ac{dl} models achieve performance levels consistent with published state-of-the-art on their respective benchmark datasets: ECGNet achieves 60.0\% test accuracy (Macro AUROC 0.7562), DiabetesNet achieves 73.4\% test accuracy (AUROC 0.8170), and ParkinsonNet achieves 97.4\% test accuracy (AUROC 0.9931). The automated triage system correctly classifies screening sessions based on combined risk levels.
+
+The system adheres to strict medical safety principles: it is explicitly positioned as a screening tool rather than a diagnostic system, always recommends professional medical consultation, and never claims diagnostic certainty.
+
+\section{Further Enhancements}
+
+The following enhancements are identified as high-priority directions for future development:
+
+\subsection{Model Improvements}
+
+\begin{itemize}
+	\item \textbf{ECGNet Regularisation}: Address the training-test accuracy gap (98.55\% $\rightarrow$ 60.0\%) through stronger augmentation (time-warping, amplitude scaling, Gaussian noise), Label Smoothing, and patient-level cross-validation instead of record-level splits.
+	\item \textbf{S-class and F-class Detection}: Apply SMOTE (Synthetic Minority Oversampling Technique) or cost-sensitive learning specifically for the Supraventricular and Fusion beat classes, which currently have F1-scores of 0.06 and 0.04 respectively.
+	\item \textbf{Multi-Ethnic Datasets}: Retrain DiabetesNet on the Saudi Arabian diabetes dataset \cite{diabetessaudi2024} or the BRFSS dataset to improve generalisation beyond the Pima Indian population.
+	\item \textbf{ParkinsonNet Dataset Expansion}: Collect or incorporate the mPower mobile Parkinson dataset (10,000+ participants) \cite{parkinsonsearlydetection2024} for a more statistically robust evaluation.
+	\item \textbf{Transformer-Based ECG Models}: Investigate replacing ECGNet with a CNN-Transformer hybrid \cite{ecghybrid2024} for improved sequence modelling of long \ac{ecg} signals.
+	\item \textbf{Clinical-Grade Nonlinear Dynamics}: Replace custom NumPy RPDE/DFA/D2 implementations with validated implementations from the TISEAN or neurokit2 libraries.
+\end{itemize}
+
+\subsection{System Architecture Enhancements}
+
+\begin{itemize}
+	\item \textbf{LLM SDK Migration}: Migrate from the deprecated \texttt{google.generativeai} SDK to the new \texttt{google.genai} SDK to ensure long-term API compatibility.
+	\item \textbf{Multi-lead ECG Support}: Extend ECGNet to accept 12-lead \ac{ecg} data, enabling more clinically comprehensive arrhythmia assessment.
+	\item \textbf{Real-time Audio Recording}: Add browser-based microphone recording capability to the Streamlit frontend to eliminate the need for pre-recorded WAV file uploads.
+	\item \textbf{Continuous Monitoring}: Implement session persistence and longitudinal tracking to monitor risk trends over multiple screening sessions for the same user.
+\end{itemize}
+
+\subsection{Security and Compliance Enhancements}
+
+\begin{itemize}
+	\item \textbf{Authentication}: Add user authentication (OAuth2 / JWT) to restrict \ac{api} access and associate sessions with registered users.
+	\item \textbf{Data Encryption}: Encrypt uploaded files at rest and in transit; implement automatic deletion of uploaded files after session completion.
+	\item \textbf{Rate Limiting}: Implement \ac{api} rate limiting to prevent abuse in production deployment.
+	\item \textbf{Audit Logging}: Maintain anonymised audit logs for system monitoring and clinical research compliance.
+\end{itemize}
+
+\subsection{Evaluation and Validation}
+
+\begin{itemize}
+	\item \textbf{Clinical Pilot Study}: Conduct a prospective pilot study in a clinical setting (under appropriate IRB approval) to evaluate screening sensitivity and specificity against confirmed diagnoses.
+	\item \textbf{User Experience Study}: Conduct usability testing with diverse users (age, technical proficiency, language background) to evaluate the conversational intake system's comprehensibility and ease of use.
+	\item \textbf{Explainability (XAI)}: Integrate Grad-CAM visualisation for \ac{ecg} beats and SHAP value explanations for diabetes features to improve model transparency and clinician trust.
+\end{itemize}
+

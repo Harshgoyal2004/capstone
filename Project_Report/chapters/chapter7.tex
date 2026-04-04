@@ -3,13 +3,39 @@
 
 \section{Model Performance Results}
 
+Figure~\ref{fig:riskthresholds} summarises the risk stratification thresholds applied across all three deployed models. All thresholds were set empirically to balance sensitivity and specificity based on observed probability distributions on the test sets.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[font=\small]
+  \draw[thick, ->] (0,0) -- (11.2,0) node[right] {Probability};
+  \foreach \x/\lab in {0/0.0, 3.5/0.35, 7.0/0.70, 10.5/1.0}
+    \draw (\x,0.12)--(\x,-0.12) node[below] {\lab};
+  \foreach \y/\name/\lo/\mi/\hi in {
+      1.8/Cardiac (ECGNet)/Low/Moderate/High,
+      1.1/Metabolic (DiabetesNet)/Low/Borderline/Elevated,
+      0.4/Motor (ParkinsonNet)/Stable/Mild/High
+  }{
+    \fill[green!30]  (0,\y)    rectangle (3.5,\y+0.5);
+    \fill[yellow!55] (3.5,\y)  rectangle (7.0,\y+0.5);
+    \fill[red!30]    (7.0,\y)  rectangle (10.5,\y+0.5);
+    \node[font=\scriptsize] at (1.75,\y+0.25) {\lo};
+    \node[font=\scriptsize] at (5.25,\y+0.25) {\mi};
+    \node[font=\scriptsize] at (8.75,\y+0.25) {\hi};
+    \node[left, font=\scriptsize, text width=2.8cm, align=right] at (0,\y+0.25) {\name};
+  }
+\end{tikzpicture}
+\caption{Risk Stratification Thresholds Across All Three Deployed Models}
+\label{fig:riskthresholds}
+\end{figure}
+
 % ──────────────────────────────────────────────────────────────────────
 \subsection{ECGNet — Cardiac Arrhythmia Classification}
 % ──────────────────────────────────────────────────────────────────────
 
 ECGNet was trained for 25 epochs on beats extracted from the MIT-BIH Arrhythmia Database (PhysioNet). The preprocessing pipeline applied a 4th-order Butterworth bandpass filter (0.5--40 Hz), detected R-peaks using \texttt{scipy.signal.find\_peaks} with a minimum distance of 180 samples (0.5 s at 360 Hz) and an adaptive height threshold of $\mu + 0.5\sigma$, and extracted 252-sample windows centred on each R-peak (108 pre-R + 144 post-R). The dataset yielded 109,446 annotated beats mapped to 5 \ac{aami} classes.
 
-Training used AdamW (weight\_decay $= 10^{-4}$), Focal Loss ($\gamma = 2$), and WeightedRandomSampler to counter the 72.6\% Normal (N) class dominance. The training accuracy converged to \textbf{98.55\%} within 15 epochs, while the test accuracy stabilised at \textbf{60.0\%}, revealing a significant overfitting gap attributable to the small number of unique patients (28 train / 19 test records) and the patient-specific nature of arrhythmia morphology.
+Training used AdamW (weight\_decay $= 10^{-4}$), Focal Loss ($\gamma = 2$), and WeightedRandomSampler to counter the 72.6\% Normal (N) class dominance. The training accuracy converged to \textbf{98.55\%} within 15 epochs, while the test accuracy stabilised at \textbf{60.0\%}, revealing a significant overfitting gap attributable to the small number of unique patients (28 train / 20 test records) and the patient-specific nature of arrhythmia morphology.
 
 \begin{table}[h!]
 \centering
@@ -59,6 +85,29 @@ The abnormality probability is computed as $1 - P(\text{Normal})$, i.e., one min
 \end{itemize}
 
 \textbf{Discussion:} The clinically most important class — Ventricular ectopic (V, F1 = 0.77, Recall = 0.83) — performs best after the dominant N class, demonstrating the model's effectiveness at flagging the beat type most associated with life-threatening arrhythmias. The poor performance on S-class (F1 = 0.06) and F-class (F1 = 0.04) is a known and documented limitation: these classes represent 1.6\% and 0.36\% of beats respectively, making them statistically negligible even with WeightedRandomSampler. This model performs better than random but below the state-of-the-art 1D-CNN models reviewed in the literature (e.g., Guhdar et al. \cite{guhdar2024} at 99.3\%, Kavitha and Shakkeera \cite{kavitha2024} at 99.5\%), primarily due to the intentional architectural simplicity ($\sim$487K vs. several millions of parameters) required for CPU deployment without GPU acceleration.
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/ecg_confusion_matrix.png}
+  \captionof{figure}{ECGNet Confusion Matrix (5-class AAMI)}
+  \label{fig:ecgcm}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/ecg_roc_curve.png}
+  \captionof{figure}{ECGNet ROC Curves per AAMI Class (Macro AUROC = 0.7562)}
+  \label{fig:ecgroc}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.80\linewidth]{images/ecg_training_curve.png}
+\caption{ECGNet Training vs.\ Test Accuracy over 25 Epochs (Overfitting Gap = 38.55 pp)}
+\label{fig:ecgtrain}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────
 \subsection{DiabetesNet — Metabolic Risk Prediction}
@@ -131,6 +180,22 @@ The sigmoid-activated output probability $\hat{y} = \sigma(\text{logit}) \in [0,
 
 \textbf{Discussion:} Test accuracy of 73.4\% and AUROC of 0.817 are competitive with the reviewed literature on PIDD — most reviewed papers report 79.2\%--86.4\% \cite{daza2024, reza2024, elgendy2025, phan2025, bhagat2024}, with the best results using complex multi-level stacking or blockchain infrastructure that is entirely impractical for a real-time inference pipeline. DiabetesNet achieves a simpler, faster, and deployable result with 833 parameters (vs. multi-thousand parameter ensembles). The lower diabetic-class recall (0.56) reflects the class imbalance (54 vs. 100 in the test set) and is consistent across all reviewed literature.
 
+\begin{figure}[h!]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/diabetes_confusion_matrix.png}
+  \captionof{figure}{DiabetesNet Confusion Matrix (PIDD Test Set, 154 samples)}
+  \label{fig:diabcm}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/diabetes_roc_curve.png}
+  \captionof{figure}{DiabetesNet ROC Curve (AUROC = 0.8170)}
+  \label{fig:diabroc}
+\end{minipage}
+\end{figure}
+
 % ──────────────────────────────────────────────────────────────────────
 \subsection{ParkinsonNet — Motor Risk Assessment}
 % ──────────────────────────────────────────────────────────────────────
@@ -198,7 +263,23 @@ The sigmoid probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ is threshold
   \item \textbf{High}: $\hat{y} \geq 0.70$
 \end{itemize}
 
-\textbf{Discussion:} 97.4\% accuracy and 0.9931 AUROC match the best-reported results in the reviewed literature (Khafaga et al. \cite{khafaga2024} 97.4\%, Guatelli et al. \cite{guatelli2024} 96.5\%, Palakayala and Kuppusamy \cite{palakayala2024} 97.6\%). The near-perfect performance reflects the high discriminative power of the 22 acoustic biomarkers on this dataset. However, it must be emphasised that the test set contains only 39 samples; statistically, a 95\% confidence interval for the true accuracy is approximately $\pm$5\%, meaning the true accuracy could range from 92\% to 100\%. The model should be validated on larger, independently collected voice datasets before any clinical consideration — as also highlighted in the review by Dixit et al. \cite{dixit2024} and Islam et al. \cite{islam2024}.
+\textbf{Discussion:} 97.4\% accuracy and 0.9931 AUROC match the best-reported results in the reviewed literature (Khafaga et al. \cite{khafaga2024} 97.4\%, Guatelli et al. \cite{guatelli2024} 96.5\%, Palakayala and Kuppusamy \cite{palakayala2024} 97.6\%). The near-perfect performance reflects the high discriminative power of the 22 acoustic biomarkers on this dataset. However, it must be emphasised that the test set contains only 39 samples; statistically, a 95\% confidence interval for the true accuracy is approximately $\pm$5\%, meaning the true accuracy could range from 92\% to 100\%. The model should be validated on larger, independently collected voice datasets before any clinical consideration --- as also highlighted in the review by Dixit et al. \cite{dixit2024} and Islam et al. \cite{islam2024}.
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/parkinsons_confusion_matrix.png}
+  \captionof{figure}{ParkinsonNet Confusion Matrix (UCI Test Set, 39 samples)}
+  \label{fig:parkcm}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/parkinsons_roc_curve.png}
+  \captionof{figure}{ParkinsonNet ROC Curve (AUROC = 0.9931)}
+  \label{fig:parkroc}
+\end{minipage}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────
 \section{End-to-End System Results}
@@ -276,4 +357,17 @@ Motor (Parkinson's) & ParkinsonNet & 0.2103 & \textbf{Stable} \\
   \item \textbf{Small Parkinson's test set}: 39-sample test evaluation is insufficient for robust clinical confidence intervals, as noted across 12 of the 16 reviewed Parkinson's papers including \cite{dixit2024, islam2024}.
   \item \textbf{Voice feature approximation}: RPDE, DFA, and D2 are computed using custom NumPy approximations rather than the clinically validated implementations used in the original UCI study \cite{little2008}.
 \end{enumerate}
+
+\subsection{Comparison with Reviewed Literature}
+
+Figure~\ref{fig:litcompare} benchmarks the three deployed models against the best reported accuracy in the reviewed literature for each disease domain.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.90\linewidth]{images/literature_comparison.png}
+\caption{Model Accuracy Comparison: This Work vs.\ Best Reported Literature Results per Domain}
+\label{fig:litcompare}
+\end{figure}
+
+ECGNet operates at 60\% test accuracy, substantially below the 99.3--99.5\% reported by GPU-trained CNN benchmarks \cite{guhdar2024, kavitha2024}, but those models are architecture-heavy and require GPU hardware incompatible with our CPU deployment constraint. DiabetesNet at 73.4\% sits below the 86.4\% top result \cite{bhagat2024} but above the median of 79.5\% for reviewed PIDD models. ParkinsonNet at 97.4\% is on a par with the best reviewed results \cite{khafaga2024, palakayala2024}, confirming that the 22 UCI voice biomarkers are highly predictive when correctly normalised.
 

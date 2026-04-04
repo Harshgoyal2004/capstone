@@ -5,7 +5,14 @@
 
 \subsection{ECGNet Training}
 
-The MIT-BIH Arrhythmia Database was preprocessed using the WFDB Python library. Beat extraction followed the procedure described in Chapter 4, yielding a total of 109,446 labelled beats. The dataset exhibits severe class imbalance: 72.6\% Normal (N), 16.2\% Paced (Q), 5.5\% Ventricular (V), 4.0\% Supraventricular (S), and 0.9\% Fusion (F) beats.
+The MIT-BIH Arrhythmia Database was preprocessed using the WFDB Python library. Beat extraction followed the procedure described in Chapter 4, yielding a total of 109,446 labelled beats. The dataset exhibits severe class imbalance: 72.6\% Normal (N), 17.0\% Paced (Q), 5.5\% Ventricular (V), 4.0\% Supraventricular (S), and 0.9\% Fusion (F) beats.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{images/class_distribution.png}
+\caption{MIT-BIH Arrhythmia Beat Class Distribution (109,446 total beats) --- N dominates at 72.6\%}
+\label{fig:classdist}
+\end{figure}
 
 To address this imbalance, \texttt{torch.utils.data.WeightedRandomSampler} was employed during training, assigning sample weights inversely proportional to class frequency. Focal Loss ($\gamma = 2$) was additionally used to further down-weight confidently-classified (predominantly Normal) samples and focus gradient updates on rare, clinically significant beat types.
 
@@ -80,7 +87,7 @@ The \ac{ecg} preprocessing pipeline was validated against the MIT-BIH Arrhythmia
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.75\linewidth]{images/sample-graph.pdf}
+	\fbox{\begin{minipage}{0.75\linewidth}\centering\vspace{1.5cm}\textit{[Figure to be inserted: ECG Preprocessing Pipeline\\Raw Signal (Top) $\rightarrow$ Bandpass Filtered (Middle) $\rightarrow$ Segmented Beat Window (Bottom)]}\vspace{1.5cm}\end{minipage}}
 	\caption{Representative \ac{ecg} Beat — Raw Signal (Top), Bandpass Filtered Signal (Middle), Segmented Beat Window (Bottom)}
 	\label{fig:ecgpreprocess}
 \end{figure}
@@ -140,5 +147,3 @@ The FastAPI backend was tested using direct HTTP requests to verify \ac{api} con
 	\item \textbf{POST /chat}: Confirmed correct JSON schema for both the no-model-result response and the model-result response. Verified \texttt{model\_results} is \texttt{null} when \texttt{<MODEL\_INPUT>} is absent.
 	\item \textbf{GET /health}: Confirmed 200 response with \texttt{\{"status":"healthy","models\_loaded":true\}}.
 \end{itemize}
-
-\end{document}

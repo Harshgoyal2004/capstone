@@ -54,6 +54,10 @@
 \RequirePackage{rotating}
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+\RequirePackage{caption}
 \lstset{captionpos=b,
 	frame=tb,
 	basicstyle=\scriptsize\ttfamily,

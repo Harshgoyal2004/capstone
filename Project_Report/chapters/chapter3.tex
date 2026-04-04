@@ -104,7 +104,7 @@ Environment & python-dotenv & $\geq$ 1.0.0 \\
 \hline
 \textbf{Model} & \textbf{Dataset} & \textbf{Size} & \textbf{Source} & \textbf{Split} \\
 \hline
-ECGNet & MIT-BIH Arrhythmia Database & 48 records / 109,446 beats & PhysioNet & 28 train / 19 test records \\
+ECGNet & MIT-BIH Arrhythmia Database & 48 records / 109,446 beats & PhysioNet & 28 train / 20 test records \\
 DiabetesNet & Pima Indians Diabetes Dataset & 768 samples, 8 features & UCI / NIDDK & 80/20 stratified \\
 ParkinsonNet & UCI Parkinson's Dataset & 195 recordings, 22 features & Univ. of Oxford & 80/20 stratified \\
 \hline
@@ -147,9 +147,53 @@ where $x \in \mathbb{R}^8$ is the normalised feature vector, and Batch Normalisa
 	\mathcal{L}_{\text{BCE}} = -[y \log(\hat{y}) + (1-y) \log(1-\hat{y})]
 \end{equation}
 
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  node distance=1.0cm,
+  box/.style={draw, rounded corners=4pt, minimum width=4.4cm, minimum height=0.65cm,
+              text centered, font=\small},
+  arrow/.style={->, >=stealth, thick}
+]
+\node[box, fill=blue!15]   (inp) {Input $\mathbf{x} \in \mathbb{R}^{8}$};
+\node[box, fill=green!15,  below of=inp] (l1)  {Linear(8${\to}$32) + BatchNorm + ReLU};
+\node[box, fill=yellow!25, below of=l1]  (d1)  {Dropout(0.3)};
+\node[box, fill=green!15,  below of=d1]  (l2)  {Linear(32${\to}$16) + ReLU};
+\node[box, fill=yellow!25, below of=l2]  (d2)  {Dropout(0.2)};
+\node[box, fill=green!15,  below of=d2]  (l3)  {Linear(16${\to}$1)};
+\node[box, fill=red!15,    below of=l3]  (out) {$\hat{y} = \sigma(\text{logit}) \in [0,1]$};
+\draw[arrow] (inp)--(l1); \draw[arrow] (l1)--(d1); \draw[arrow] (d1)--(l2);
+\draw[arrow] (l2)--(d2); \draw[arrow] (d2)--(l3); \draw[arrow] (l3)--(out);
+\end{tikzpicture}
+\caption{DiabetesNet Architecture --- Tabular Deep Neural Network (8 $\rightarrow$ 32 $\rightarrow$ 16 $\rightarrow$ 1)}
+\label{fig:diabetesnet}
+\end{figure}
+
 \subsection{ParkinsonNet — Voice Feature DNN}
 
 ParkinsonNet accepts a 22-dimensional feature vector of acoustic biomarkers extracted from sustained vowel phonation. The architecture mirrors DiabetesNet with higher-capacity layers (22 $\rightarrow$ 64 $\rightarrow$ 32 $\rightarrow$ 1) and stronger regularisation (Dropout 0.4). The 22 features span fundamental frequency statistics, jitter, shimmer, noise ratios, nonlinear dynamics, and pitch entropy measures, all normalised using StandardScaler fitted to the UCI training set.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  node distance=1.0cm,
+  box/.style={draw, rounded corners=4pt, minimum width=4.4cm, minimum height=0.65cm,
+              text centered, font=\small},
+  arrow/.style={->, >=stealth, thick}
+]
+\node[box, fill=blue!15]   (inp) {Input $\mathbf{x} \in \mathbb{R}^{22}$ (voice biomarkers)};
+\node[box, fill=green!15,  below of=inp] (l1)  {Linear(22${\to}$64) + BatchNorm + ReLU};
+\node[box, fill=yellow!25, below of=l1]  (d1)  {Dropout(0.4)};
+\node[box, fill=green!15,  below of=d1]  (l2)  {Linear(64${\to}$32) + ReLU};
+\node[box, fill=yellow!25, below of=l2]  (d2)  {Dropout(0.3)};
+\node[box, fill=green!15,  below of=d2]  (l3)  {Linear(32${\to}$1)};
+\node[box, fill=red!15,    below of=l3]  (out) {$\hat{y} = \sigma(\text{logit}) \in [0,1]$};
+\draw[arrow] (inp)--(l1); \draw[arrow] (l1)--(d1); \draw[arrow] (d1)--(l2);
+\draw[arrow] (l2)--(d2); \draw[arrow] (d2)--(l3); \draw[arrow] (l3)--(out);
+\end{tikzpicture}
+\caption{ParkinsonNet Architecture --- Voice Feature Deep Neural Network (22 $\rightarrow$ 64 $\rightarrow$ 32 $\rightarrow$ 1)}
+\label{fig:parkinsonnet}
+\end{figure}
 
 \section{API Specification}
 

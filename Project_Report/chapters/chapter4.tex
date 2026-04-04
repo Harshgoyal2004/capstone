@@ -7,7 +7,7 @@ The AI Health Screening Assistant follows a client-server architecture comprisin
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/system_arch.pdf}
+	\includegraphics[width=0.85\linewidth]{images/system_diagram.png}
 	\caption{High-Level System Architecture of the AI Health Screening Assistant}
 	\label{fig:sysarch}
 \end{figure}
@@ -112,11 +112,42 @@ Risk levels from the three models are combined using a rule-based triage classif
 	\item Otherwise $\rightarrow$ \texttt{routine}
 \end{enumerate}
 
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  node distance=1.4cm,
+  decision/.style={diamond, draw, fill=orange!20, text width=3.6cm, text centered,
+                   inner sep=2pt, font=\small, aspect=2},
+  result/.style={rectangle, draw, rounded corners=3pt, minimum width=3.4cm,
+                 minimum height=0.65cm, text centered, font=\small},
+  start/.style={rectangle, draw, rounded corners=3pt, fill=blue!12,
+                minimum width=5.0cm, minimum height=0.65cm, text centered, font=\small},
+  arrow/.style={->, >=stealth, thick}
+]
+\node[start] (in)   {3 Risk Scores: Cardiac, Metabolic, Motor};
+\node[decision, below=1.2cm of in] (d1) {Any risk\\is \textbf{High} /\\\textbf{Elevated}?};
+\node[result, right=2.6cm of d1, fill=red!20]    (p)  {\textbf{priority\_review}};
+\node[decision, below=1.4cm of d1] (d2) {$\geq$2 risks are\\Moderate /\\Borderline / Mild?};
+\node[result, right=2.6cm of d2, fill=yellow!35] (r)  {\textbf{recommended\_check}};
+\node[result, below=1.2cm of d2,  fill=green!20] (ro) {\textbf{routine}};
+\draw[arrow] (in)  -- (d1);
+\draw[arrow] (d1)  -- node[above, font=\small]{Yes} (p);
+\draw[arrow] (d1)  -- node[right, font=\small]{No}  (d2);
+\draw[arrow] (d2)  -- node[above, font=\small]{Yes} (r);
+\draw[arrow] (d2)  -- node[right, font=\small]{No}  (ro);
+\end{tikzpicture}
+\caption{Rule-Based Triage Decision Logic}
+\label{fig:triage}
+\end{figure}
+
 \subsection{Data Flow Diagram}
 
-The complete data flow from user input to screening report is:
+Figure~\ref{fig:llmpipeline} illustrates the complete data flow from user input to screening report. The double-pass \ac{llm} architecture is the central design novelty: the \ac{llm} never generates risk numbers, only interprets them.
 
-\[\text{User Chat} \rightarrow \text{Gemini (Pass 1)} \rightarrow \texttt{<MODEL\_INPUT>} \rightarrow \text{Parser}\]
-\[\rightarrow \text{ECGNet} + \text{DiabetesNet} + \text{ParkinsonNet} \rightarrow \texttt{<MODEL\_OUTPUT>}\]
-\[\rightarrow \text{Gemini (Pass 2)} \rightarrow \text{Patient-Facing Explanation} \rightarrow \text{Streamlit UI}\]
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.95\linewidth]{images/llm_pipeline.png}
+	\caption{Double-Pass LLM Pipeline --- Complete Data Flow from User Input to Screening Report}
+	\label{fig:llmpipeline}
+\end{figure}
 

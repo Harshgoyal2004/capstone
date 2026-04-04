@@ -1,0 +1,99 @@
+====================================================================
+MERMAID DIAGRAMS — EXPORT INSTRUCTIONS
+====================================================================
+
+Go to:  https://mermaid.live
+
+For each diagram below:
+  1. Paste the mermaid code into the editor on the left
+  2. Click the Export button (top-right)
+  3. Choose PNG, set width = 1200px, theme = default
+  4. Save with the filename shown for each diagram
+
+Both PNG files must be placed in:
+  Project_Report/images/
+
+====================================================================
+DIAGRAM 1: Double-Pass LLM Pipeline
+Save as: images/llm_pipeline.png
+Referenced in: chapter4.tex  (Figure 4.x, label fig:llmpipeline)
+====================================================================
+
+flowchart TD
+    A([User Message]) --> B[Groq LLM — Pass 1\nConversational Intake]
+    B --> C{Enough biomarkers\ncollected?}
+    C -- No --> D[Follow-up questions\nfor missing data]
+    D --> A
+    C -- Yes --> E[Emit structured\nMODEL_INPUT token\nECG path · voice path · biomarkers]
+    E --> F[parser.py\nExtract MODEL_INPUT block]
+    F --> G[ECGNet\nCardiac inference]
+    F --> H[DiabetesNet\nMetabolic inference]
+    F --> I[ParkinsonNet\nMotor inference]
+    G --> J[Risk Scores\nCardiac · Metabolic · Motor]
+    H --> J
+    I --> J
+    J --> K[Triage Logic\nroutine / recommended\ncheck / priority review]
+    K --> L[Groq LLM — Pass 2\nExplanation Generator\nNon-diagnostic · references\nmodel outputs only]
+    L --> M([Final Response\nto User])
+
+    style A fill:#d4edda,stroke:#28a745
+    style M fill:#d4edda,stroke:#28a745
+    style E fill:#fff3cd,stroke:#ffc107
+    style K fill:#cce5ff,stroke:#004085
+    style L fill:#e2d9f3,stroke:#6f42c1
+
+====================================================================
+DIAGRAM 2: ECGNet Architecture (Multi-Scale Block + Channel Attention)
+Save as: images/ecgnet_architecture.png
+Referenced in: chapter3.tex (in the ECGNet subsection, if you add a
+               \includegraphics reference there)
+====================================================================
+
+flowchart TD
+    IN([Input\n1 × 252 ECG samples]) --> CONV1[Conv1D  k=7  32 ch\nBatchNorm · ReLU]
+    CONV1 --> MS1[MultiScaleBlock 1\n32 → 64 channels]
+    subgraph MS1 [MultiScaleBlock — 64 ch]
+        direction LR
+        B1[Conv k=3\n64 ch]
+        B2[Conv k=5\n64 ch]
+        B3[Conv k=7\n64 ch]
+        B1 & B2 & B3 --> CAT1[Concat → 192 ch]
+        CAT1 --> PW1[PointwiseConv\n192→64 ch]
+    end
+    MS1 --> CA1[ChannelAttention\n64 ch\nSE-style squeeze-excite]
+    CA1 --> MAX1[MaxPool 1D  2×]
+    MAX1 --> MS2[MultiScaleBlock 2\n64 → 128 channels]
+    subgraph MS2 [MultiScaleBlock — 128 ch]
+        direction LR
+        C1[Conv k=3\n128 ch]
+        C2[Conv k=5\n128 ch]
+        C3[Conv k=7\n128 ch]
+        C1 & C2 & C3 --> CAT2[Concat → 384 ch]
+        CAT2 --> PW2[PointwiseConv\n384→128 ch]
+    end
+    MS2 --> CA2[ChannelAttention\n128 ch]
+    CA2 --> MAX2[MaxPool 1D  2×]
+    MAX2 --> MS3[MultiScaleBlock 3\n128 → 256 channels]
+    subgraph MS3 [MultiScaleBlock — 256 ch]
+        direction LR
+        D1[Conv k=3\n256 ch]
+        D2[Conv k=5\n256 ch]
+        D3[Conv k=7\n256 ch]
+        D1 & D2 & D3 --> CAT3[Concat → 768 ch]
+        CAT3 --> PW3[PointwiseConv\n768→256 ch]
+    end
+    MS3 --> CA3[ChannelAttention\n256 ch]
+    CA3 --> GAP[GlobalAvgPool\n256-d vector]
+    GAP --> DO[Dropout 0.5]
+    DO --> FC[Linear 256 → 5]
+    FC --> OUT([Softmax\n5 AAMI classes\nN · S · V · F · Q])
+
+    style IN  fill:#d4edda,stroke:#28a745
+    style OUT fill:#d4edda,stroke:#28a745
+    style CA1 fill:#cce5ff,stroke:#004085
+    style CA2 fill:#cce5ff,stroke:#004085
+    style CA3 fill:#cce5ff,stroke:#004085
+
+====================================================================
+END OF MERMAID CHARTS
+====================================================================

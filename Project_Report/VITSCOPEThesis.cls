@@ -49,6 +49,7 @@
 \RequirePackage{pdfpages}
 % other packages
 \RequirePackage{listings}
+\RequirePackage{float}
 \RequirePackage{ragged2e}
 \RequirePackage{ifthen}
 \RequirePackage{rotating}
@@ -71,36 +72,50 @@
 \newcommand{\makevittitlepage}{%
   \begin{titlepage}
     \centering
-    \vspace*{0.5cm}
-    \includegraphics[width=3cm]{images/vit_logo.png}\\[0.5cm]
+    \vspace*{0.2cm}
+    \includegraphics[width=3cm]{images/vit_logo.png}\\[0.3cm]
     {\Large \textbf{VELLORE INSTITUTE OF TECHNOLOGY}}\\[0.2cm]
     {\large \textbf{SCHOOL OF COMPUTER SCIENCE AND ENGINEERING}}\\[0.2cm]
-    {\large Vellore, Tamil Nadu -- 632014}\\[1.5cm]
+    {\large Vellore, Tamil Nadu -- 632014}
+    
+    \vfill
+    
     \hrule height 2pt
-    \vspace{0.4cm}
-    {\LARGE \textbf{CAPSTONE PROJECT REPORT}}\\[0.3cm]
+    \vspace{0.3cm}
+    {\LARGE \textbf{CAPSTONE PROJECT REPORT}}\\[0.2cm]
     \hrule height 2pt
-    \vspace{1cm}
-    {\Large \textbf{AI Health Screening Assistant: A Conversational\\[0.3cm]
-    Multi-Disease Screening Platform Integrating\\[0.3cm]
-    Deep Learning and Large Language Models}}\\[1.5cm]
+    
+    \vfill
+    
+    {\Large \textbf{UNIFIED MULTI-DISEASE PREDICTION SYSTEM\\[0.3cm]
+    USING ADVANCED DEEP LEARNING \&\\[0.3cm]
+    ENSEMBLE TECHNIQUES}}
+    
+    \vfill
+    
     \begin{tabular}{ll}
       \textbf{Submitted by:} & Harsh Goyal \\
       \textbf{Registration Number:} & 22BCE2789 \\
-      \textbf{Programme:} & B.Tech. Computer Science and Engineering \\
-      \textbf{Specialisation:} & AI \& Machine Learning \\
+      \textbf{Programme:} & Bachelor of Technology \\
+      \textbf{Specialisation:} & Computer Science and Engineering \\
       \textbf{School:} & School of Computer Science and Engineering \\
-    \end{tabular}\\[1.5cm]
+    \end{tabular}
+    
+    \vspace{0.5cm}
+    
     \begin{tabular}{ll}
       \textbf{Project Guide:} & Prof. Manikandan G \\
       \textbf{Designation:} & Assistant Professor, SCOPE \\
-    \end{tabular}\\[1.5cm]
+    \end{tabular}
+    
+    \vfill
+    
     \hrule
-    \vspace{0.4cm}
-    {\large \textbf{Academic Year: 2025 -- 2026}}\\[0.3cm]
+    \vspace{0.3cm}
+    {\large \textbf{Academic Year: 2025 -- 2026}}\\[0.2cm]
     {\large \textbf{Submitted in partial fulfilment of the requirements for}}\\[0.2cm]
     {\large \textbf{the Degree of Bachelor of Technology}}\\
-    \vspace{0.4cm}
+    \vspace{0.3cm}
     \hrule
   \end{titlepage}
 }

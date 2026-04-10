@@ -11,24 +11,11 @@ This project addresses this unmet need by building an \textit{AI Health Screenin
 
 \subsection{Current Systems and Existing Solutions}
 
-Existing approaches to automated health screening generally fall into one of three categories:
-
-\begin{itemize}
-	\item \textbf{Single-disease screening tools}: Most deployed \ac{ai} health tools focus on a single disease domain. For example, \ac{ecg} analysis tools such as AliveCor's KardiaMobile detect atrial fibrillation, while apps like MySugr focus solely on diabetes management. These specialised tools lack the capability to provide holistic, multi-domain screening from a single interaction.
-	\item \textbf{Symptom checkers with rule-based logic}: Tools such as Ada Health and Infermedica's Symptom Checker use decision-tree or probabilistic reasoning to suggest possible conditions based on user-reported symptoms. They generally do not incorporate \ac{dl} models or biomarker data, limiting their clinical informativeness.
-	\item \textbf{Research-grade \ac{ml} models}: A large body of published literature demonstrates high-performance \ac{ml} models for individual disease classification — particularly for \ac{ecg} arrhythmia detection \cite{ecgcnn2024}, diabetes prediction \cite{diabetesensemble2024}, and Parkinson's voice analysis \cite{parkinsonsvoice2024}. However, these are predominantly research artifacts without user-friendly deployment interfaces.
-\end{itemize}
+Existing approaches to automated health screening generally fall into one of three categories. Firstly, \textbf{single-disease screening tools} dominate the landscape, where deployed \ac{ai} health tools focus strictly on a single disease domain. For example, \ac{ecg} analysis tools such as AliveCor's KardiaMobile exclusively detect atrial fibrillation, while applications like MySugr focus solely on diabetes management; consequently, these specialised tools lack the capability to provide holistic, multi-domain screening from a single interaction. Secondly, there are \textbf{symptom checkers driven by rule-based logic}, such as Ada Health and Infermedica's Symptom Checker, which apply decision-tree or probabilistic reasoning to suggest possible conditions based on user-reported symptoms. However, they generally do not incorporate \ac{dl} models or process raw biomarker data, thereby limiting their clinical informativeness. Finally, there exists a multitude of \textbf{research-grade \ac{ml} models}. While a vast body of published literature demonstrates high-performance \ac{ml} algorithms for individual disease classification---particularly for \ac{ecg} arrhythmia detection \cite{ecgcnn2024}, diabetes prediction \cite{diabetesensemble2024}, and Parkinson's voice analysis \cite{parkinsonsvoice2024}---these remain predominantly confined as research artifacts lacking accessible, user-friendly deployment interfaces.
 
 \subsection{Limitations of Existing Systems}
 
-The primary limitations identified in existing solutions include:
-
-\begin{itemize}
-	\item \textbf{Single-disease focus}: No commercially available tool simultaneously performs cardiac, metabolic, and motor risk screening from a unified interface.
-	\item \textbf{Lack of conversational intake}: Existing tools require manual form filling or app-based data entry. A conversational AI-driven intake dramatically lowers the barrier for non-technical users.
-	\item \textbf{Absence of explainability}: Most deployed systems return a binary risk flag without contextual explanation. This fails to empower users to understand their own health risk factors or take informed action.
-	\item \textbf{No closed-loop \ac{llm} architecture}: The concept of using an \ac{llm} to both collect structured data and subsequently interpret the quantitative output of downstream \ac{ml} models in patient-facing language is novel and is not implemented in any known commercial product.
-\end{itemize}
+The primary limitations identified in these existing solutions stem from their fragmented architectures. Their severe \textbf{single-disease focus} means that there is currently no commercially available tool capable of simultaneously performing cardiac, metabolic, and motor risk screening from a unified interface. Compounding this issue is a widespread \textbf{lack of conversational intake}. Because existing tools require rigid manual form filling or complex app-based data entry, they inherently alienate non-technical patients, whereas a conversational \ac{ai}-driven approach would dramatically lower this barrier to entry. Furthermore, there is a pervasive \textbf{absence of explainability}; most deployed systems simply return a stark binary risk flag without offering any contextual explanation. This ultimately fails to empower users with the required knowledge to understand their own health risk factors or to subsequently take informed action. Most critically, these systems suffer from having \textbf{no closed-loop \ac{llm} architecture}. The foundational concept of using an \ac{llm} not only to collect structured data symmetrically but to subsequently interpret the quantitative mathematical outputs of downstream \ac{ml} models into digestible, patient-facing language stands as a distinct novelty that has yet to be implemented in any known commercial diagnostic product.
 
 \subsection{Relevant Technologies and Concepts}
 
@@ -38,11 +25,7 @@ This project draws on several key technological domains. \textbf{Deep Learning} 
 
 The theoretical underpinning of each predictive subsystem is as follows:
 
-\begin{itemize}
-	\item \textbf{ECGNet (Cardiac Screening)}: Based on the Squeeze-and-Excitation (SE) mechanism \cite{senet2018} and multi-scale convolutional feature extraction, enabling the model to capture ECG morphological patterns across different temporal resolutions simultaneously.
-	\item \textbf{DiabetesNet (Metabolic Screening)}: A fully connected tabular \ac{dnn} with Batch Normalization and Dropout, trained using Binary Cross-Entropy with Logits Loss on the Pima Indians Diabetes Dataset.
-	\item \textbf{ParkinsonNet (Motor Screening)}: Exploits well-established acoustic biomarkers of Parkinson's disease — jitter, shimmer, and harmonic-to-noise ratio — which reflect the dysphonia (voice disorder) characteristic of the condition \cite{parkinsonsvoice2024}.
-\end{itemize}
+\textbf{ECGNet (Cardiac Screening)} is modeled upon the Squeeze-and-Excitation (SE) mechanism \cite{senet2018} alongside multi-scale convolutional feature extraction architectures, inherently enabling the model to accurately capture complex \ac{ecg} morphological patterns across drastically different temporal resolutions simultaneously. Conversely, \textbf{DiabetesNet (Metabolic Screening)} engages a fully connected tabular \ac{dnn} strictly enforced with Batch Normalization and Dropout configurations, identically trained using Binary Cross-Entropy with Logits Loss leveraging the Pima Indians Diabetes Dataset. Finally, \textbf{ParkinsonNet (Motor Screening)} mathematically exploits well-established acoustic biomarkers indicative of Parkinson's disease---namely capturing deviations in jitter, shimmer, alongside the harmonic-to-noise ratio---all of which holistically reflect the physiological dysphonia (voice disorder) acting as the predominant characteristic of the pathological condition \cite{parkinsonsvoice2024}.
 
 \section{Motivation}
 
@@ -62,25 +45,11 @@ The key innovation is the \textbf{closed-loop LLM-ML pipeline}: the \ac{llm} col
 
 \subsection{Functional Scope}
 
-The AI Health Screening Assistant provides the following capabilities:
-
-\begin{itemize}
-	\item Conversational medical intake via Gemini \ac{llm} for three disease domains
-	\item Upload and inference on \ac{ecg} waveform CSV files (cardiac screening)
-	\item Upload and inference on voice recording WAV files (Parkinson's screening)
-	\item Collection of 8 clinical biomarkers via chat for diabetes screening
-	\item Automated triage classification (routine / recommended check / priority review)
-	\item Patient-friendly result explanations with clinical recommendations
-\end{itemize}
+The AI Health Screening Assistant facilitates conversational medical intake via the Gemini \ac{llm} across three distinct disease domains. To support this functionality, the system accepts uploads and conducts direct sequential inference on \ac{ecg} waveform CSV files tailored for cardiac screening, alongside parsing voice recording WAV files targeting Parkinson's screening. For metabolic assessment, it seamlessly orchestrates the collection of eight precise clinical biomarkers directly via chat. Having compiled this robust clinical profile, the assistant then enforces an automated triage classification hierarchy---sorting conditions into routine, recommended check, or priority review allocations---culminating in the generation of patient-friendly result explanations deeply enriched with contextual clinical recommendations.
 
 \subsection{Non-Functional Scope}
 
-\begin{itemize}
-	\item The system is designed as a \textbf{screening tool only} and explicitly prohibits diagnostic claims
-	\item Response latency is optimised through model pre-loading at server startup
-	\item The system supports multiple Gemini model fallbacks for API availability
-	\item The frontend is accessible via standard web browser
-\end{itemize}
+Critically, the architecture operates strictly within rigid non-functional constraints, being fundamentally designed as a \textbf{screening tool only} that explicitly prohibits any generation of diagnostic claims. To ensure fluid user interaction, overall response latency remains heavily optimised through proactive model pre-loading sequences initiated directly at server startup. Backend robustness is guaranteed as the system natively supports dynamic failover routing across multiple Gemini model versions, ensuring uninterrupted \ac{api} availability. Consequently, the entire operational pipeline is delivered frictionlessly, as the frontend experience is completely accessible via any standard web browser without demanding local installation.
 
 \subsection{Technical Scope}
 
@@ -88,13 +57,5 @@ The system is implemented entirely in Python 3.10+, uses PyTorch $\geq$ 2.0 for 
 
 \subsection{Project Boundaries}
 
-\begin{itemize}
-	\item The system is \textbf{not} intended for clinical deployment or regulatory submission
-	\item The models were trained on specific population datasets and may not generalise to all demographics
-	\item Real-time audio recording is not supported; users must upload pre-recorded WAV files
-	\begin{itemize}
-		\item Multi-lead \ac{ecg} analysis is not supported; only single-lead waveform CSV files are accepted
-		\item The system does not store patient data and has no persistent user session management
-	\end{itemize}
-\end{itemize}
+In establishing its absolute operational bounds, it must be acknowledged that the system is definitively \textbf{not} intended for live clinical deployment nor formal regulatory medical submission. Clinically, because the diagnostic models were trained solely on extremely specific quantitative population datasets, their resulting inferences may not reliably generalise evenly across all demographic representations. Furthermore, technical scope limitations dictate that real-time audio recording capability is deliberately not supported, compelling users to instead supply pre-recorded WAV files for acoustic analysis. By the same token, advanced multi-lead \ac{ecg} analysis is not supported; the extraction algorithms are strictly tuned such that only single-lead voltage waveform CSV files are accepted. Finally, ensuring total baseline privacy compliance, the application architecture guarantees that the system intrinsically does not maintain or store patient data, nor does it implement any backend mechanisms geared towards persistent user session management.
 

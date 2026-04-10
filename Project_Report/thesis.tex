@@ -20,6 +20,7 @@
 	\listoffigures	
 	\addcontentsline{toc}{section}{List of Figures}
 	\newpage
+	\acuseall
 	\addcontentsline{toc}{section}{List of Abbreviations}
 	\printacronyms[include=abbr, name=List of Abbreviations]
 	\newpage
@@ -29,21 +30,20 @@
 	%--------  Thesis contents -----------------------------------
 	\pagenumbering{arabic}
 	\setcounter{page}{1}
-	\include{chapters/chapter1}
-	\include{chapters/chapter2}
-	\include{chapters/chapter3}
-	\include{chapters/chapter4}
-	\include{chapters/chapter5}
-	\include{chapters/chapter6}
-	\include{chapters/chapter7}
-	\include{chapters/chapter8}
+	\input{chapters/chapter1}
+	\input{chapters/chapter2}
+	\input{chapters/chapter3}
+	\input{chapters/chapter4}
+	\input{chapters/chapter5}
+	\input{chapters/chapter6}
+	\input{chapters/chapter7}
+	\input{chapters/chapter8}
 	
 	%------ Bibliography ----------------------------------------
 	\bibliography{references.bib}
 	%------ Appendices ----------------------------------------
 	\newpage
-	\include{appendix/sourcecode}
-	\newpage
-	\include{appendix/publication}
+	\input{appendix/sourcecode}
+
 	
 \end{document}

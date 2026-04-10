@@ -25,7 +25,7 @@ Figure~\ref{fig:riskthresholds} summarises the risk stratification thresholds ap
     \node[left, font=\scriptsize, text width=2.8cm, align=right] at (0,\y+0.25) {\name};
   }
 \end{tikzpicture}
-\caption{Risk Stratification Thresholds Across All Three Deployed Models}
+\caption[Risk Stratification Thresholds]{Risk Stratification Thresholds Across All Three Deployed Models}
 \label{fig:riskthresholds}
 \end{figure}
 
@@ -33,13 +33,11 @@ Figure~\ref{fig:riskthresholds} summarises the risk stratification thresholds ap
 \subsection{ECGNet — Cardiac Arrhythmia Classification}
 % ──────────────────────────────────────────────────────────────────────
 
-ECGNet was trained for 25 epochs on beats extracted from the MIT-BIH Arrhythmia Database (PhysioNet). The preprocessing pipeline applied a 4th-order Butterworth bandpass filter (0.5--40 Hz), detected R-peaks using \texttt{scipy.signal.find\_peaks} with a minimum distance of 180 samples (0.5 s at 360 Hz) and an adaptive height threshold of $\mu + 0.5\sigma$, and extracted 252-sample windows centred on each R-peak (108 pre-R + 144 post-R). The dataset yielded 109,446 annotated beats mapped to 5 \ac{aami} classes.
-
-Training used AdamW (weight\_decay $= 10^{-4}$), Focal Loss ($\gamma = 2$), and WeightedRandomSampler to counter the 72.6\% Normal (N) class dominance. The training accuracy converged to \textbf{98.55\%} within 15 epochs, while the test accuracy stabilised at \textbf{60.0\%}, revealing a significant overfitting gap attributable to the small number of unique patients (28 train / 20 test records) and the patient-specific nature of arrhythmia morphology.
+ECGNet was trained on the MIT-BIH Arrhythmia Database following the methodology detailed in Chapter 5. The training accuracy converged to \textbf{98.55\%} within 15 epochs, while the test accuracy stabilised at \textbf{60.0\%}, revealing a significant overfitting gap attributable to the small number of unique patients (28 train / 20 test records) and the patient-specific nature of arrhythmia morphology.
 
 \begin{table}[h!]
 \centering
-\caption{ECGNet Per-Class Performance on MIT-BIH Arrhythmia Database Test Set}
+\caption[ECGNet Per-Class Performance]{ECGNet Per-Class Performance on MIT-BIH Arrhythmia Database Test Set}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|c|c|c|c|c|}
 \hline
@@ -77,12 +75,7 @@ Output & 5-class softmax logits \\
 \end{table}
 
 \textbf{Risk Stratification (deployed thresholds):}
-The abnormality probability is computed as $1 - P(\text{Normal})$, i.e., one minus the probability assigned to the N class by the softmax output, averaged across all detected beats in the uploaded ECG. The thresholds are:
-\begin{itemize}
-  \item \textbf{Low}: Abnormality probability $< 0.35$
-  \item \textbf{Moderate}: Abnormality probability $0.35$--$0.70$
-  \item \textbf{High}: Abnormality probability $\geq 0.70$
-\end{itemize}
+The abnormality probability is computed as $1 - P(\text{Normal})$, representing one minus the softmax probability assigned to the N class, averaged across all detected beats in the uploaded \ac{ecg}. This continuous probability score is then stratified into discrete clinical categories. Scores strictly below 0.35 are categorised as \textbf{Low} risk. Conversely, if the abnormality probability falls inclusively between 0.35 and 0.70, it signals a \textbf{Moderate} risk, whereas any score equal to or exceeding 0.70 is immediately flagged as a \textbf{High} risk event.
 
 \textbf{Discussion:} The clinically most important class — Ventricular ectopic (V, F1 = 0.77, Recall = 0.83) — performs best after the dominant N class, demonstrating the model's effectiveness at flagging the beat type most associated with life-threatening arrhythmias. The poor performance on S-class (F1 = 0.06) and F-class (F1 = 0.04) is a known and documented limitation: these classes represent 1.6\% and 0.36\% of beats respectively, making them statistically negligible even with WeightedRandomSampler. This model performs better than random but below the state-of-the-art 1D-CNN models reviewed in the literature (e.g., Guhdar et al. \cite{guhdar2024} at 99.3\%, Kavitha and Shakkeera \cite{kavitha2024} at 99.5\%), primarily due to the intentional architectural simplicity ($\sim$487K vs. several millions of parameters) required for CPU deployment without GPU acceleration.
 
@@ -91,13 +84,13 @@ The abnormality probability is computed as $1 - P(\text{Normal})$, i.e., one min
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/ecg_confusion_matrix.png}
-  \captionof{figure}{ECGNet Confusion Matrix (5-class AAMI)}
+  \captionof{figure}[ECGNet Confusion Matrix]{ECGNet Confusion Matrix (5-class AAMI)}
   \label{fig:ecgcm}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/ecg_roc_curve.png}
-  \captionof{figure}{ECGNet ROC Curves per AAMI Class (Macro AUROC = 0.7562)}
+  \captionof{figure}[ECGNet ROC Curves]{ECGNet ROC Curves per AAMI Class (Macro AUROC = 0.7562)}
   \label{fig:ecgroc}
 \end{minipage}
 \end{figure}
@@ -105,7 +98,7 @@ The abnormality probability is computed as $1 - P(\text{Normal})$, i.e., one min
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.80\linewidth]{images/ecg_training_curve.png}
-\caption{ECGNet Training vs.\ Test Accuracy over 25 Epochs (Overfitting Gap = 38.55 pp)}
+\caption[ECGNet Training vs.\ Test Accuracy]{ECGNet Training vs.\ Test Accuracy over 25 Epochs (Overfitting Gap = 38.55 pp)}
 \label{fig:ecgtrain}
 \end{figure}
 
@@ -113,11 +106,11 @@ The abnormality probability is computed as $1 - P(\text{Normal})$, i.e., one min
 \subsection{DiabetesNet — Metabolic Risk Prediction}
 % ──────────────────────────────────────────────────────────────────────
 
-DiabetesNet was trained for 80 epochs on the Pima Indians Diabetes Dataset (614 training / 154 test samples, stratified split with \texttt{random\_state=42}). All 8 features were normalised using StandardScaler fitted only on training data; the scaler mean and standard deviation arrays are hard-coded in \texttt{inference/diabetes.py}.
+DiabetesNet was trained on the Pima Indians Diabetes Dataset following the methodology detailed in Chapter 5.
 
 \begin{table}[h!]
 \centering
-\caption{DiabetesNet Input Feature Statistics (from Pima Indians Diabetes Dataset)}
+\caption[DiabetesNet Input Feature Statistics]{DiabetesNet Input Feature Statistics (from Pima Indians Diabetes Dataset)}
 \renewcommand{\arraystretch}{1.3}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{|c|l|l|c|c|}
@@ -138,7 +131,7 @@ DiabetesNet was trained for 80 epochs on the Pima Indians Diabetes Dataset (614 
 
 \begin{table}[h!]
 \centering
-\caption{DiabetesNet Per-Class Performance on PIDD Test Set (154 samples)}
+\caption[DiabetesNet Per-Class Performance]{DiabetesNet Per-Class Performance on PIDD Test Set (154 samples)}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
@@ -171,12 +164,7 @@ Loss Function & BCEWithLogitsLoss \\
 \end{table}
 
 \textbf{Risk Stratification (deployed thresholds):}
-The sigmoid-activated output probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ is thresholded as:
-\begin{itemize}
-  \item \textbf{Low}: $\hat{y} < 0.35$
-  \item \textbf{Borderline}: $0.35 \leq \hat{y} < 0.70$
-  \item \textbf{Elevated}: $\hat{y} \geq 0.70$
-\end{itemize}
+The sigmoid-activated output probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ drives the metabolic risk categorisation. For cases where the model outputs a probability strictly below 0.35, the patient is assessed as having a \textbf{Low} metabolic risk. A probability ranging from 0.35 up to strictly less than 0.70 places the patient in the \textbf{Borderline} category, necessitating sustained preventive lifestyle observations. Finally, output values of 0.70 or greater definitively denote an \textbf{Elevated} metabolic risk profile.
 
 \textbf{Discussion:} Test accuracy of 73.4\% and AUROC of 0.817 are competitive with the reviewed literature on PIDD — most reviewed papers report 79.2\%--86.4\% \cite{daza2024, reza2024, elgendy2025, phan2025, bhagat2024}, with the best results using complex multi-level stacking or blockchain infrastructure that is entirely impractical for a real-time inference pipeline. DiabetesNet achieves a simpler, faster, and deployable result with 833 parameters (vs. multi-thousand parameter ensembles). The lower diabetic-class recall (0.56) reflects the class imbalance (54 vs. 100 in the test set) and is consistent across all reviewed literature.
 
@@ -185,13 +173,13 @@ The sigmoid-activated output probability $\hat{y} = \sigma(\text{logit}) \in [0,
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/diabetes_confusion_matrix.png}
-  \captionof{figure}{DiabetesNet Confusion Matrix (PIDD Test Set, 154 samples)}
+  \captionof{figure}[DiabetesNet Confusion Matrix]{DiabetesNet Confusion Matrix (PIDD Test Set, 154 samples)}
   \label{fig:diabcm}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/diabetes_roc_curve.png}
-  \captionof{figure}{DiabetesNet ROC Curve (AUROC = 0.8170)}
+  \captionof{figure}[DiabetesNet ROC Curve]{DiabetesNet ROC Curve (AUROC = 0.8170)}
   \label{fig:diabroc}
 \end{minipage}
 \end{figure}
@@ -200,13 +188,13 @@ The sigmoid-activated output probability $\hat{y} = \sigma(\text{logit}) \in [0,
 \subsection{ParkinsonNet — Motor Risk Assessment}
 % ──────────────────────────────────────────────────────────────────────
 
-ParkinsonNet was trained for 120 epochs on the UCI Parkinson's Dataset (156 training / 39 test samples, stratified split with \texttt{random\_state=42}). The model operates on 22 StandardScaler-normalised voice biomarkers; scaler constants are stored in \texttt{inference/parkinson.py}. For real-time inference, the 22 features are extracted from uploaded WAV files using the pipeline in \texttt{extract\_voice\_features()}, which uses \texttt{librosa.pyin()} (pYIN algorithm \cite{pyin2014}) for fundamental frequency estimation, and custom NumPy implementations for jitter, shimmer, NHR/HNR, RPDE, DFA, D2, and pitch entropy.
+ParkinsonNet was trained on the UCI Parkinson's Dataset following the methodology detailed in Chapter 5.
 
 \begin{table}[h!]
 \centering
-\caption{ParkinsonNet 22 Input Voice Features (UCI Parkinson Dataset Schema)}
+\caption[ParkinsonNet 22 Input Voice Features]{ParkinsonNet 22 Input Voice Features (UCI Parkinson Dataset Schema)}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{8cm}|}
 \hline
 \textbf{Feature Group} & \textbf{Feature Names} \\
 \hline
@@ -222,7 +210,7 @@ Pitch / Frequency Entropy (4) & spread1, spread2, D2, PPE \\
 
 \begin{table}[h!]
 \centering
-\caption{ParkinsonNet Per-Class Performance on UCI Parkinson's Test Set (39 samples)}
+\caption[ParkinsonNet Per-Class Performance]{ParkinsonNet Per-Class Performance on UCI Parkinson's Test Set (39 samples)}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
@@ -256,12 +244,7 @@ Input Features & 22 (StandardScaler normalised) \\
 \end{table}
 
 \textbf{Risk Stratification (deployed thresholds):}
-The sigmoid probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ is thresholded as:
-\begin{itemize}
-  \item \textbf{Stable}: $\hat{y} < 0.35$
-  \item \textbf{Mild}: $0.35 \leq \hat{y} < 0.70$
-  \item \textbf{High}: $\hat{y} \geq 0.70$
-\end{itemize}
+The sigmoid probability score $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ serves as the baseline for staging motor risk. Scores below the 0.35 threshold are considered \textbf{Stable}, indicating an unlikelihood of immediate neuro-motor degradation. When the probability sits inclusively between 0.35 and strictly below 0.70, the system issues a \textbf{Mild} assessment. Should the prediction reach or exceed 0.70, it triggers a \textbf{High} risk warning, indicating a pronounced presence of vocal perturbation biomarkers indicative of Parkinson's disease.
 
 \textbf{Discussion:} 97.4\% accuracy and 0.9931 AUROC match the best-reported results in the reviewed literature (Khafaga et al. \cite{khafaga2024} 97.4\%, Guatelli et al. \cite{guatelli2024} 96.5\%, Palakayala and Kuppusamy \cite{palakayala2024} 97.6\%). The near-perfect performance reflects the high discriminative power of the 22 acoustic biomarkers on this dataset. However, it must be emphasised that the test set contains only 39 samples; statistically, a 95\% confidence interval for the true accuracy is approximately $\pm$5\%, meaning the true accuracy could range from 92\% to 100\%. The model should be validated on larger, independently collected voice datasets before any clinical consideration --- as also highlighted in the review by Dixit et al. \cite{dixit2024} and Islam et al. \cite{islam2024}.
 
@@ -270,13 +253,13 @@ The sigmoid probability $\hat{y} = \sigma(\text{logit}) \in [0, 1]$ is threshold
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/parkinsons_confusion_matrix.png}
-  \captionof{figure}{ParkinsonNet Confusion Matrix (UCI Test Set, 39 samples)}
+  \captionof{figure}[ParkinsonNet Confusion Matrix]{ParkinsonNet Confusion Matrix (UCI Test Set, 39 samples)}
   \label{fig:parkcm}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/parkinsons_roc_curve.png}
-  \captionof{figure}{ParkinsonNet ROC Curve (AUROC = 0.9931)}
+  \captionof{figure}[ParkinsonNet ROC Curve]{ParkinsonNet ROC Curve (AUROC = 0.9931)}
   \label{fig:parkroc}
 \end{minipage}
 \end{figure}
@@ -340,23 +323,13 @@ Motor (Parkinson's) & ParkinsonNet & 0.2103 & \textbf{Stable} \\
 
 \subsection{Strengths}
 
-\begin{enumerate}
-  \item \textbf{Safety by architecture}: The double-pass \ac{llm} pipeline structurally prevents hallucination of risk values — the primary safety concern identified in Gap 3. Unlike Peixoto et al. \cite{peixoto2024} where LLMs generate assessments, here the LLM only interprets PyTorch outputs.
-  \item \textbf{Accessibility}: No prior system provides simultaneous multi-disease conversational screening from a single browser session. All three identified gaps (2, 4, 5) regarding data collection, ECG access, and voice analysis are addressed.
-  \item \textbf{ParkinsonNet performance}: 97.4\% accuracy and AUROC 0.9931 match the state-of-the-art reviewed literature results on the UCI dataset.
-  \item \textbf{Deployability}: The entire system operates on CPU hardware with no GPU requirement, using open-source tools, at zero marginal cost on free-tier cloud hosting.
-  \item \textbf{Triage system}: The rule-based three-level triage (routine / recommended check / priority review) provides clinically actionable output even when individual model probabilities are close to decision boundaries.
-\end{enumerate}
+The developed screening assistant achieves substantial progress across multiple dimensions of clinical \ac{ai} deployment. Foremost, the system prioritises \textbf{safety by architecture}: its double-pass \ac{llm} pipeline structurally circumvents the hallucination of medical risk values, directly addressing the primary safety concern identified in our literature review (Gap 3). Unlike concurrent systems such as Peixoto et al.\ \cite{peixoto2024} which allow models to independently generate assessments, this platform strictly confines the \ac{llm} to interpreting verified PyTorch outputs. In terms of \textbf{accessibility}, this platform is the first to achieve simultaneous multi-disease conversational screening within a unified browser session, successfully closing identified gaps regarding disparate data collection, \ac{ecg} accessibility, and complex voice analysis pipelines. The underlying deterministic models are empirically robust, highlighted by \textbf{ParkinsonNet's standout performance} achieving 97.4\% accuracy and a 0.9931 AUROC, matching the leading edge of existing literature on the UCI dataset. Additionally, the system excels in practical \textbf{deployability}. The entire modular stack operates efficiently on standard CPU hardware exclusively relying on open-source libraries, scaling at zero marginal cost on free-tier cloud hosting without the requisite for expensive GPU acceleration. Finally, the overarching \textbf{triage system} enforces a dependable, rule-based hierarchy---outputting routine, recommended checks, or priority clinical reviews---thus generating clinically actionable directives even on occasions when foundational model probabilities teeter close to ambiguous decision boundaries.
 
 \subsection{Limitations}
 
-\begin{enumerate}
-  \item \textbf{ECGNet overfitting}: The 38.55-percentage-point training-test accuracy gap is a significant limitation. The models reviewed in the literature that achieve 99\%+ accuracy also use near-identical train/test data from MIT-BIH — but the key difference is that our deployment architecture (CPU, single-lead, lightweight model) prioritises accessibility over peak benchmark accuracy.
-  \item \textbf{S-class and F-class failure}: ECGNet achieves F1 = 0.06 (S-class) and F1 = 0.04 (F-class), identical to the failure modes documented across the reviewed literature \cite{ayyub2025, kerdoudi2024}. This reflects the fundamental inadequacy of the MIT-BIH dataset for minority-class learning, not an architecture-specific flaw.
-  \item \textbf{Demographic specificity}: DiabetesNet is trained exclusively on PIDD (female Pima Indian patients) — the same demographic limitation present in all 15 reviewed diabetes papers that use this dataset.
-  \item \textbf{Small Parkinson's test set}: 39-sample test evaluation is insufficient for robust clinical confidence intervals, as noted across 12 of the 16 reviewed Parkinson's papers including \cite{dixit2024, islam2024}.
-  \item \textbf{Voice feature approximation}: RPDE, DFA, and D2 are computed using custom NumPy approximations rather than the clinically validated implementations used in the original UCI study \cite{little2008}.
-\end{enumerate}
+Despite satisfying its design criteria, the system's underlying models suffer from documented technical and diagnostic shortcomings. A prominent issue is \textbf{ECGNet's overfitting trend}, characterised by a 38.55-percentage-point disparity between training and validation accuracy. While other models operating on the MIT-BIH dataset comfortably capture upwards of 99\% accuracy by utilising much deeper architectures, our intentional deployment constraint regarding lightweight, CPU-based execution prioritised wide accessibility at the cost of peak benchmark accuracy. This lightweight \ac{ecg} topology consequently struggles with severe \textbf{S-class and F-class failure modes}, returning abysmal F1-scores of 0.06 and 0.04 respectively. However, as noted by Ayyub et al.\ \cite{ayyub2025} and Kerdoudi et al.\ \cite{kerdoudi2024}, these failures are universally resonant across literature, reflecting the intrinsic lack of minority-class representation within the MIT-BIH corpora rather than a specific algorithmic defect.
+
+The tabular prediction networks exhibit analogous dataset constraints. \textbf{DiabetesNet's demographic specificity} presents an obvious limitation, having been exclusively trained on the female demographics of the Pima Indians Diabetes Dataset; this heavily restricts its generalisability, mirroring the fundamental constraint present across all fifteen reviewed diabetes papers relying on the same benchmark. \textbf{ParkinsonNet's evaluation is similarly constrained by test set size}; testing across only 39 samples is wholly insufficient for generating robust 95\% clinical confidence intervals, a pervasive weakness widely acknowledged across contemporary Parkinson's research including works by Dixit et al.\ \cite{dixit2024} and Islam et al.\ \cite{islam2024}. Finally, the system's reliance on \textbf{voice feature approximations}---namely calculating RPDE, DFA, and D2 via custom, performance-optimised NumPy functions instead of the clinically standardised integrations proposed in the original UCI baseline \cite{little2008}---introduces minor numerical drift which might impact reproducibility in stringent medical comparisons.
 
 \subsection{Comparison with Reviewed Literature}
 
@@ -365,7 +338,7 @@ Figure~\ref{fig:litcompare} benchmarks the three deployed models against the bes
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.90\linewidth]{images/literature_comparison.png}
-\caption{Model Accuracy Comparison: This Work vs.\ Best Reported Literature Results per Domain}
+\caption[Model Accuracy Comparison with Literature]{Model Accuracy Comparison: This Work vs.\ Best Reported Literature Results per Domain}
 \label{fig:litcompare}
 \end{figure}
 

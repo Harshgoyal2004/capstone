@@ -1,0 +1,29 @@
+\acswitchoff 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Hardware Specifications Used for Development and Training}}{14}{}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Software Stack and Version Specifications}}{14}{}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces Dataset Specifications for the Three Models}}{15}{}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces FastAPI Endpoint Specifications}}{17}{}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Voice Feature Extraction Methods}}{21}{}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces ECGNet Training Hyperparameters}}{26}{}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces DiabetesNet Training Hyperparameters}}{26}{}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces ParkinsonNet Training Hyperparameters}}{26}{}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Integration Test Results Summary}}{28}{}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces Key Implementation Challenges and Solutions}}{31}{}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {7.1}{\ignorespaces ECGNet Per-Class Performance}}{32}{}%
+\contentsline {table}{\numberline {7.2}{\ignorespaces ECGNet Summary Metrics}}{33}{}%
+\contentsline {table}{\numberline {7.3}{\ignorespaces DiabetesNet Input Feature Statistics}}{34}{}%
+\contentsline {table}{\numberline {7.4}{\ignorespaces DiabetesNet Per-Class Performance}}{34}{}%
+\contentsline {table}{\numberline {7.5}{\ignorespaces DiabetesNet Summary Metrics}}{35}{}%
+\contentsline {table}{\numberline {7.6}{\ignorespaces ParkinsonNet 22 Input Voice Features}}{35}{}%
+\contentsline {table}{\numberline {7.7}{\ignorespaces ParkinsonNet Per-Class Performance}}{36}{}%
+\contentsline {table}{\numberline {7.8}{\ignorespaces ParkinsonNet Summary Metrics}}{36}{}%
+\contentsline {table}{\numberline {7.9}{\ignorespaces Demo Session Patient Input Parameters}}{37}{}%
+\contentsline {table}{\numberline {7.10}{\ignorespaces Demo Screening Output Results}}{37}{}%
+\addvspace {10\p@ }

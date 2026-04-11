@@ -1,0 +1,190 @@
+\begin{thebibliography}{}
+
+\bibitem[Ayyub et~al., 2025]{ayyub2025}
+Ayyub, A., Politis, C., and Usman, M.~A. (2025).
+\newblock A comprehensive review of {AI}-based detection of arrhythmia using
+  electrocardiogram ({ECG}).
+\newblock {\em Computers in Biology and Medicine}, 196:110594.
+
+\bibitem[Basith et~al., 2024]{basith2024}
+Basith, S., Lee, G., and Manavalan, B. (2024).
+\newblock {AntiT2DMP-Pred}: Leveraging feature fusion and optimization for
+  superior machine learning prediction of type 2 diabetes mellitus.
+\newblock {\em Computers in Biology and Medicine}.
+
+\bibitem[Bhagat and Maulik, 2024]{bhagat2024}
+Bhagat, M. and Maulik, U. (2024).
+\newblock {StaBloCare}: Blockchain-secured diabetes monitoring system using
+  stacked deep learning.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Daza et~al., 2024]{daza2024}
+Daza, A., Ponce~S{\'a}nchez, C.~F., Apaza-Perez, G., Pinto, J., and
+  Zavaleta~Ramos, K. (2024).
+\newblock Stacking ensemble approach to diagnosing the disease of diabetes.
+\newblock {\em Informatics in Medicine Unlocked}, 44:101427.
+
+\bibitem[Deng et~al., 2023]{deng2023}
+Deng, X., Liu, Q., Deng, Y., and Mahadevan, S. (2023).
+\newblock An improved method to construct basic probability assignment based on
+  the confusion matrix for classification problem.
+\newblock {\em Information Sciences}, 340--341:250--261.
+
+\bibitem[Dixit et~al., 2024]{dixit2024}
+Dixit, S., Bohre, K., Singh, Y., Himeur, Y., Mansoor, W., Atalla, S., and
+  Srinivasan, K. (2024).
+\newblock {Parkinson's} disease detection based on artificial intelligence:
+  Methodologies, datasets, clinical applications, challenges and future
+  directions.
+\newblock {\em Computers in Biology and Medicine}.
+
+\bibitem[Dutenhefner et~al., 2026]{dutenhefner2026}
+Dutenhefner, P., Rezende, T., Fernandes, J.~G., Tuler, D., Paix{\~a}o, G.
+  M.~M., Pappa, G., Ribeiro, A., and Meira~Jr., W. (2026).
+\newblock A hybrid hierarchical transformer model for {ECG} classification and
+  age prediction.
+\newblock {\em Computers in Biology and Medicine}.
+
+\bibitem[Elgendy et~al., 2025]{elgendy2025}
+Elgendy, I.~A., Hosny, M., Albashrawi, M.~A., and Alsenan, S. (2025).
+\newblock Dual-stage explainable ensemble learning model for diabetes
+  diagnosis.
+\newblock {\em Expert Systems with Applications}.
+
+\bibitem[Gao et~al., 2024]{gao2024}
+Gao, W. et~al. (2024).
+\newblock {EEG}-based {Parkinson's} disease classification method by
+  integrating topological features and multi-scale spatio-temporal networks.
+\newblock {\em Computers in Biology and Medicine}.
+
+\bibitem[Guatelli et~al., 2024]{guatelli2024}
+Guatelli, R., Aubin, V., Mora-Cofr{\'e}, M., Naranjo-Torres, J., and
+  Mora-Olivari, A. (2024).
+\newblock Detection of {Parkinson's} disease based on spectrograms of voice
+  recordings and extreme learning machine random weight neural networks.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Guhdar et~al., 2024]{guhdar2024}
+Guhdar, M., Mohammed, A.~O., and Mstafa, R.~J. (2024).
+\newblock Advanced deep learning framework for {ECG} arrhythmia classification
+  using {1D-CNN} with attention mechanism.
+\newblock {\em IEEE Access}.
+
+\bibitem[Hammouda et~al., 2024]{hammouda2024}
+Hammouda, M., Shcherbak, A., Bril, E., Semenov, M., Sergiyenko, O., and Somov,
+  A. (2024).
+\newblock Transfer learning for assessing {Parkinson's} disease: Analysis of
+  wrist-worn sensors data and time-series imaging.
+\newblock {\em Measurement}.
+
+\bibitem[Islam et~al., 2024]{islam2024}
+Islam, M.~A., Majumder, M. Z.~H., Hussein, M.~A., Hossain, K.~M., and Miah,
+  M.~S. (2024).
+\newblock A review of machine learning and deep learning algorithms for
+  {Parkinson's} disease detection using handwriting and voice datasets.
+\newblock {\em Heliyon}, 10:e25469.
+
+\bibitem[Kavitha and Shakkeera, 2024]{kavitha2024}
+Kavitha, P. and Shakkeera, L. (2024).
+\newblock An explainable deep learning framework for accurate and automated
+  cardiac arrhythmia classification using electrocardiogram signals.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Kerdoudi et~al., 2024]{kerdoudi2024}
+Kerdoudi, S., Guezouli, L., and Dilekh, T. (2024).
+\newblock Enhanced {ECG} arrhythmia detection with deep learning and multi-head
+  attention mechanism.
+\newblock {\em Computers and Electrical Engineering}.
+
+\bibitem[Khafaga et~al., 2024]{khafaga2024}
+Khafaga, D.~S. et~al. (2024).
+\newblock Hybrid greylag goose and particle swarm optimization for early
+  detection of {Parkinson's} disease from speech features.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Khatar et~al., 2024]{khatar2024}
+Khatar, Z. et~al. (2024).
+\newblock {GAF-GradCAM}: Guided dynamic weighted fusion of temporal and
+  frequency {GAF} {2D} matrices for {ECG}-based arrhythmia detection using deep
+  learning.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Little et~al., 2008]{little2008}
+Little, M.~A., McSharry, P.~E., Roberts, S.~J., Costello, D. A.~E., and Moroz,
+  I.~M. (2008).
+\newblock Suitability of dysphonia measurements for telemonitoring of
+  {Parkinson's} disease.
+\newblock {\em IEEE Transactions on Biomedical Engineering}, 56(4):1015--1022.
+
+\bibitem[Liu et~al., 2024]{liu2024}
+Liu, X., Xu, Y., Xu, H., He, L., Long, S., Huang, Y., Wang, Y., Lu, Y., Huang,
+  Y., Wu, J., Gao, H., and Liu, X. (2024).
+\newblock Advancing interpretable cardiac disease diagnosis via a
+  transformer-convolutional hybrid network on electrocardiograms.
+\newblock {\em Computers in Biology and Medicine}.
+
+\bibitem[Mahajan et~al., 2024]{mahajan2024}
+Mahajan, P. et~al. (2024).
+\newblock Graph-enhanced deep learning for {ECG} arrhythmia detection: An
+  integration of {CNN-GNN-BiLSTM} approach.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Mauch and Dixon, 2014]{pyin2014}
+Mauch, M. and Dixon, S. (2014).
+\newblock {pYIN}: A fundamental frequency estimator using probabilistic
+  threshold distributions.
+\newblock In {\em IEEE International Conference on Acoustics, Speech and Signal
+  Processing (ICASSP)}, pages 659--663. IEEE.
+
+\bibitem[Palakayala and Kuppusamy, 2024]{palakayala2024}
+Palakayala, A.~R. and Kuppusamy, P. (2024).
+\newblock Differentiating {Parkinson's} disease from other neuro diseases and
+  diagnosis using deep learning with nature inspired algorithms and ensemble
+  learning.
+\newblock {\em Procedia Computer Science}, 235:588--597.
+
+\bibitem[Peixoto~Jr. et~al., 2024]{peixoto2024}
+Peixoto~Jr., E., Cordeiro, F., Chen, J., Camacho, D., Steven, A. J.~E., and
+  de~Albuquerque, V. H.~C. (2024).
+\newblock Multimodal diagnosis of {Parkinson's} disease with an internet-based
+  collaborative agent architecture of medical language models.
+\newblock {\em Computers in Biology and Medicine}.
+
+\bibitem[Reza et~al., 2024]{reza2024}
+Reza, M.~S., Amin, R., Yasmin, R., Kulsum, W., and Ruhi, S. (2024).
+\newblock Improving diabetes disease patients classification using stacking
+  ensemble method with {PIMA} and local healthcare data.
+\newblock {\em Heliyon}.
+
+\bibitem[Sirmayanti et~al., 2024]{sirmayanti2024}
+Sirmayanti, Prastyo, P.~H., and Mahyati (2024).
+\newblock Enhancing diabetes prediction performance using feature selection
+  based on grey wolf optimizer with autophagy mechanism.
+\newblock {\em Procedia Computer Science}.
+
+\bibitem[Siva~Shankar and Manikandan, 2019]{sivashankar2019}
+Siva~Shankar, G. and Manikandan, K. (2019).
+\newblock Diagnosis of diabetes diseases using optimized fuzzy rule set by grey
+  wolf optimization.
+\newblock {\em Pattern Recognition Letters}, 125:432--438.
+
+\bibitem[Venkatesh et~al., 2026]{venkatesh2026}
+Venkatesh, V., Angalaeswari, S., and Sekar, A. (2026).
+\newblock {ASNet}: Attention-stacked deep network for {ECG}-based cardiac
+  rhythm classification.
+\newblock {\em Biomedical Signal Processing and Control}.
+
+\bibitem[Wang and Nguyen, 2024]{wang2024}
+Wang, A. and Nguyen, B.~P. (2024).
+\newblock Deterministic autoencoder using {Wasserstein} loss for tabular data
+  generation.
+\newblock {\em Pattern Recognition Letters}.
+
+\bibitem[Wang et~al., 2024]{wang2024point}
+Wang, X., Nomm, S., Huang, J., Medijainen, K., Toomela, A., and Ruzhansky, M.
+  (2024).
+\newblock {PointExplainer}: Towards transparent {Parkinson's} disease
+  diagnosis.
+\newblock {\em Expert Systems with Applications}.
+
+\end{thebibliography}

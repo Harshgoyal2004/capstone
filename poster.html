@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>AI Health Screening Assistant – Capstone Poster</title>
+<style>
+  /* ── Page setup: A1 portrait 59.4 × 84 cm ── */
+  @page { size: 594mm 841mm; margin: 0; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 594mm;
+    height: 841mm;
+    font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+    font-size: 20pt;
+    line-height: 1.35;
+    background: #fff;
+    color: #111;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    display: flex;
+    align-items: center;
+    padding: 10mm 12mm 6mm 12mm;
+    border-bottom: 3px solid #1a3a6b;
+    gap: 10mm;
+  }
+
+  #header-logo {
+    width: 55mm;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #header-logo img {
+    width: 50mm;
+    height: auto;
+  }
+
+  /* VIT crest placeholder */
+  #header-logo-placeholder {
+    width: 50mm;
+    height: 50mm;
+    border: 3px solid #1a3a6b;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #1a3a6b;
+    color: white;
+    font-size: 11pt;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  #header-text { flex: 1; }
+
+  #header-title {
+    font-size: 34pt;
+    font-weight: bold;
+    color: #1a3a6b;
+    line-height: 1.15;
+  }
+
+  #header-subtitle {
+    font-size: 22pt;
+    color: #333;
+    margin-top: 2mm;
+  }
+
+  /* ── AUTHOR LINE ── */
+  #authors {
+    background: #1a3a6b;
+    color: #fff;
+    font-size: 18pt;
+    padding: 3mm 12mm;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── TWO-COLUMN BODY ── */
+  #body {
+    display: flex;
+    gap: 0;
+    padding: 5mm 9mm;
+    height: calc(841mm - 90mm); /* subtract header + authors */
+  }
+
+  .col-left  { width: 47%; padding-right: 6mm; }
+  .col-right { width: 53%; padding-left: 5mm; border-left: 1.5px solid #ccc; }
+
+  /* ── SECTION CARDS ── */
+  .section { margin-bottom: 5mm; }
+
+  .section-header {
+    background: #1a3a6b;
+    color: #fff;
+    font-size: 22pt;
+    font-weight: bold;
+    padding: 2.5mm 5mm;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .section-body {
+    border: 1.5px solid #1a3a6b;
+    border-top: none;
+    padding: 4mm 5mm;
+    font-size: 18pt;
+    background: #fff;
+    border-radius: 0 0 2px 2px;
+  }
+
+  .section-body p { margin-bottom: 3mm; }
+  .section-body ul { padding-left: 6mm; margin-bottom: 3mm; }
+  .section-body ul li { margin-bottom: 1.5mm; }
+
+  /* ── PERFORMANCE TABLE ── */
+  table.perf {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16pt;
+    margin-top: 3mm;
+    margin-bottom: 3mm;
+  }
+
+  table.perf th {
+    background: #1a3a6b;
+    color: #fff;
+    padding: 2mm 3mm;
+    text-align: center;
+    border: 1px solid #1a3a6b;
+  }
+
+  table.perf td {
+    padding: 2mm 3mm;
+    border: 1px solid #bbb;
+    text-align: center;
+  }
+
+  table.perf tr:nth-child(even) td { background: #eef2fb; }
+
+  .badge {
+    display: inline-block;
+    padding: 0.5mm 3mm;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 15pt;
+  }
+  .badge-green  { background: #c8f0c8; color: #1a5c1a; }
+  .badge-yellow { background: #fff3c8; color: #7a5000; }
+  .badge-red    { background: #fdd; color: #8b0000; }
+
+  /* ── DIAGRAMS ── */
+  .diagram-img {
+    width: 100%;
+    height: auto;
+    margin: 3mm 0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+  }
+
+  .caption {
+    font-size: 14pt;
+    color: #555;
+    font-style: italic;
+    text-align: center;
+    margin-top: 1mm;
+    margin-bottom: 3mm;
+  }
+
+  /* ── HIGHLIGHT BOXES ── */
+  .highlight-box {
+    background: #eef2fb;
+    border-left: 4px solid #1a3a6b;
+    padding: 3mm 4mm;
+    margin: 3mm 0;
+    font-size: 17pt;
+  }
+
+  .key-stat {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1a3a6b;
+    color: #fff;
+    border-radius: 4px;
+    padding: 3mm 5mm;
+    margin: 2mm;
+    min-width: 28mm;
+    text-align: center;
+  }
+  .key-stat .stat-num { font-size: 26pt; font-weight: bold; }
+  .key-stat .stat-lbl { font-size: 13pt; }
+
+  .stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 3mm 0;
+  }
+
+  /* ── REFERENCES ── */
+  .ref-list { font-size: 14pt; color: #333; }
+  .ref-list p { margin-bottom: 1.5mm; }
+
+  strong.red { color: #c0392b; }
+  strong.blue { color: #1a3a6b; }
+  strong.green { color: #1a5c1a; }
+
+  /* triage badges row */
+  .triage-row {
+    display: flex;
+    gap: 3mm;
+    margin: 3mm 0;
+    justify-content: center;
+  }
+  .triage-badge {
+    padding: 2mm 4mm;
+    border-radius: 3px;
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div id="header">
+  <div id="header-logo">
+    <div id="header-logo-placeholder">
+      <div style="font-size:20pt;margin-bottom:2mm;">⚙</div>
+      VIT<br/>VELLORE
+    </div>
+  </div>
+  <div id="header-text">
+    <div id="header-title">AI Health Screening Assistant</div>
+    <div id="header-subtitle">School of Computer Science and Engineering &ndash; Winter Semester 2025&ndash;26</div>
+  </div>
+</div>
+
+<div id="authors">
+  Harsh Goyal &nbsp;|&nbsp; Guide: Prof. &nbsp;|&nbsp; B.Tech CSE Capstone Project &nbsp;|&nbsp; Vellore Institute of Technology, Vellore
+</div>
+
+<!-- ═══════════════ BODY ═══════════════ -->
+<div id="body">
+
+  <!-- ══════════ LEFT COLUMN ══════════ -->
+  <div class="col-left">
+
+    <!-- Introduction -->
+    <div class="section">
+      <div class="section-header">Introduction</div>
+      <div class="section-body">
+        <p>Cardiovascular disease, diabetes mellitus, and Parkinson's disease collectively account for millions of deaths annually. The WHO reports <strong>17.9 million</strong> CVD deaths per year, while <strong>500+ million</strong> individuals live with type 2 diabetes and <strong>10 million</strong> with Parkinson's disease globally.</p>
+        <p>Despite a large body of academic ML research, <strong>no single interactive tool</strong> exists that screens a patient for all three diseases in one session. Existing solutions are single-disease, require structured form-based input, and produce outputs interpretable only by clinicians.</p>
+        <div class="highlight-box">
+          <strong>Research Gap:</strong> 49 reviewed papers each address only <em>one</em> disease domain. None deploy a conversational, multi-disease, hallucination-safe AI screening system.
+        </div>
+      </div>
+    </div>
+
+    <!-- Motivation -->
+    <div class="section">
+      <div class="section-header">Motivation</div>
+      <div class="section-body">
+        <ul>
+          <li>Pre-symptomatic screening greatly improves patient outcomes for all three diseases.</li>
+          <li>Existing tools are fragmented: cardiac, metabolic, and motor screening require <strong>separate specialist visits</strong>.</li>
+          <li>LLM-based tools (e.g., Peixoto et al., 2024) risk <strong>hallucinating medical probabilities</strong> — posing direct patient safety risks.</li>
+          <li>This project introduces a <strong>novel double-pass LLM architecture</strong> that prevents hallucination by design: all numerical risk values originate exclusively from PyTorch inference.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Scope -->
+    <div class="section">
+      <div class="section-header">Scope of the Project</div>
+      <div class="section-body">
+        <ul>
+          <li><strong>Three disease domains:</strong> Cardiac arrhythmia (ECG), Diabetes mellitus (8 biomarkers), Parkinson's disease (voice)</li>
+          <li><strong>File inputs:</strong> CSV ECG waveforms, WAV voice recordings</li>
+          <li><strong>Conversational intake</strong> for all metabolic biomarkers via Gemini LLM chat</li>
+          <li><strong>Automated triage:</strong> Routine → Recommended Check → Priority Review</li>
+          <li><strong>Non-diagnostic:</strong> Explicitly presented as a screening tool only</li>
+          <li><strong>CPU-deployable</strong> on free-tier cloud (Render)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Methodology -->
+    <div class="section">
+      <div class="section-header">Methodology</div>
+      <div class="section-body">
+        <p><strong>Double-Pass LLM Architecture:</strong></p>
+        <img class="diagram-img" src="/Users/harshgoyal/.gemini/antigravity/brain/26a17143-732d-4e92-81fa-5aecf2694540/double_pass_llm_poster_1775897931565.png" alt="Double-Pass LLM Pipeline"/>
+        <p class="caption">Fig. 1 — Double-Pass LLM Pipeline. The LLM never generates risk numbers; all probabilities originate from PyTorch inference.</p>
+
+        <p><strong>Three PyTorch Models:</strong></p>
+        <ul>
+          <li><strong>ECGNet</strong> — Multi-Scale Attention 1D-CNN, 487K params, trained on MIT-BIH (109,446 beats). Focal Loss (γ=2) addresses severe class imbalance.</li>
+          <li><strong>DiabetesNet</strong> — Tabular DNN (8→32→16→1), 833 params, trained on Pima Indians Diabetes Dataset (768 samples).</li>
+          <li><strong>ParkinsonNet</strong> — Voice Feature DNN (22→64→32→1), 3,617 params, trained on UCI Parkinson's Dataset (195 recordings, 22 acoustic biomarkers).</li>
+        </ul>
+
+        <p><strong>Tech Stack:</strong> Python 3.10+ · FastAPI · PyTorch ≥2.0 · Streamlit · Google Gemini API · librosa · SciPy</p>
+      </div>
+    </div>
+
+  </div><!-- /col-left -->
+
+  <!-- ══════════ RIGHT COLUMN ══════════ -->
+  <div class="col-right">
+
+    <!-- System Architecture -->
+    <div class="section">
+      <div class="section-header">System Architecture</div>
+      <div class="section-body">
+        <img class="diagram-img" src="/Users/harshgoyal/.gemini/antigravity/brain/26a17143-732d-4e92-81fa-5aecf2694540/system_architecture_poster_1775897906804.png" alt="System Architecture"/>
+        <p class="caption">Fig. 2 — Three-layer client-server architecture: Streamlit frontend, FastAPI backend, and three PyTorch inference modules.</p>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="section">
+      <div class="section-header">Results</div>
+      <div class="section-body">
+
+        <p><strong>Model Performance on Test Sets:</strong></p>
+        <table class="perf">
+          <tr>
+            <th>Model</th>
+            <th>Dataset</th>
+            <th>Test Accuracy</th>
+            <th>AUROC</th>
+            <th>Parameters</th>
+          </tr>
+          <tr>
+            <td><strong>ECGNet</strong></td>
+            <td>MIT-BIH (44,034 beats)</td>
+            <td>60.0%</td>
+            <td>0.7562</td>
+            <td>~487K</td>
+          </tr>
+          <tr>
+            <td><strong>DiabetesNet</strong></td>
+            <td>PIDD (154 samples)</td>
+            <td>73.4%</td>
+            <td>0.8170</td>
+            <td>833</td>
+          </tr>
+          <tr>
+            <td><strong>ParkinsonNet</strong></td>
+            <td>UCI PD (39 samples)</td>
+            <td><strong>97.4%</strong></td>
+            <td><strong>0.9931</strong></td>
+            <td>3,617</td>
+          </tr>
+        </table>
+
+        <p><strong>ECGNet Per-Class Performance (5-class AAMI):</strong></p>
+        <table class="perf">
+          <tr>
+            <th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th>
+          </tr>
+          <tr><td>N — Normal</td><td>0.82</td><td>0.62</td><td>0.71</td></tr>
+          <tr><td>S — Supraventricular</td><td>0.06</td><td>0.06</td><td>0.06</td></tr>
+          <tr><td>V — Ventricular</td><td>0.72</td><td>0.83</td><td><strong>0.77</strong></td></tr>
+          <tr><td>F — Fusion</td><td>0.02</td><td>0.55</td><td>0.04</td></tr>
+          <tr><td>Q — Paced</td><td>0.80</td><td>0.59</td><td>0.68</td></tr>
+        </table>
+
+        <div class="stats-row">
+          <div class="key-stat">
+            <span class="stat-num">97.4%</span>
+            <span class="stat-lbl">ParkinsonNet<br/>Accuracy</span>
+          </div>
+          <div class="key-stat">
+            <span class="stat-num">0.9931</span>
+            <span class="stat-lbl">ParkinsonNet<br/>AUROC</span>
+          </div>
+          <div class="key-stat">
+            <span class="stat-num">73.4%</span>
+            <span class="stat-lbl">DiabetesNet<br/>Accuracy</span>
+          </div>
+          <div class="key-stat">
+            <span class="stat-num">7 turns</span>
+            <span class="stat-lbl">Avg. Intake<br/>Conversation</span>
+          </div>
+        </div>
+
+        <p><strong>Triage System — Rule-Based Output:</strong></p>
+        <div class="triage-row">
+          <div class="triage-badge badge-green">✔ Routine</div>
+          <div class="triage-badge badge-yellow">⚠ Recommended Check</div>
+          <div class="triage-badge badge-red">🔴 Priority Review</div>
+        </div>
+
+        <div class="highlight-box">
+          <strong>Demo Result:</strong> Patient with glucose=148 mg/dL, BMI=33.6 → Cardiac: <span class="badge badge-green">Low (0.12)</span> · Metabolic: <span class="badge badge-yellow">Borderline (0.56)</span> · Motor: <span class="badge badge-green">Stable (0.21)</span> → Triage: <strong>Routine</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="section">
+      <div class="section-header">Conclusion</div>
+      <div class="section-body">
+        <ul>
+          <li><strong>First multi-disease conversational AI screening tool</strong> addressing 6 identified research gaps.</li>
+          <li><strong>Novel double-pass LLM architecture</strong> eliminates hallucination risk — LLM interprets, never generates risk scores.</li>
+          <li><strong>Fully deployable</strong> on CPU-only free-tier cloud; requires only a browser.</li>
+          <li>ParkinsonNet achieves <strong>97.4% accuracy / AUROC 0.9931</strong>, on par with state-of-the-art literature.</li>
+          <li><strong>Future work:</strong> Multi-lead ECG support, multi-ethnic datasets, clinical pilot study, OAuth2 security, real-time audio.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- References -->
+    <div class="section">
+      <div class="section-header">References</div>
+      <div class="section-body ref-list">
+        <p>[1] Guhdar et al. (2024). Advanced deep learning framework for ECG arrhythmia classification. <em>IEEE Access.</em></p>
+        <p>[2] Daza et al. (2024). Stacking ensemble for diabetes diagnosis. <em>Informatics in Medicine Unlocked.</em></p>
+        <p>[3] Islam et al. (2024). ML &amp; DL for Parkinson's detection. <em>Heliyon, 10.</em></p>
+        <p>[4] Peixoto et al. (2024). Multimodal diagnosis of Parkinson's using LLMs. <em>Computers in Biology and Medicine.</em></p>
+        <p>[5] Little et al. (2008). Dysphonia measurements for Parkinson's telemonitoring. <em>IEEE Trans. BME, 56(4).</em></p>
+        <p>[6] Moody &amp; Mark (2001). The MIT-BIH Arrhythmia Database. <em>IEEE EMB Magazine, 20(3).</em></p>
+        <p style="margin-top:3mm;"><strong>Student Reg No: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name: Harsh Goyal</strong></p>
+        <p><strong>Guide Name: Prof. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong></p>
+      </div>
+    </div>
+
+  </div><!-- /col-right -->
+
+</div><!-- /body -->
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+\acswitchoff 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces DiabetesNet Architecture}}{16}{}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces ParkinsonNet Architecture}}{17}{}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces High-Level System Architecture}}{18}{}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Rule-Based Triage Decision Logic}}{23}{}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Double-Pass LLM Pipeline}}{24}{}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces MIT-BIH Arrhythmia Class Distribution}}{25}{}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Representative \ac {ecg} Beat}}{27}{}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {7.1}{\ignorespaces Risk Stratification Thresholds}}{32}{}%
+\contentsline {figure}{\numberline {7.2}{\ignorespaces ECGNet Confusion Matrix}}{33}{}%
+\contentsline {figure}{\numberline {7.3}{\ignorespaces ECGNet ROC Curves}}{33}{}%
+\contentsline {figure}{\numberline {7.4}{\ignorespaces ECGNet Training vs.\ Test Accuracy}}{34}{}%
+\contentsline {figure}{\numberline {7.5}{\ignorespaces DiabetesNet Confusion Matrix}}{35}{}%
+\contentsline {figure}{\numberline {7.6}{\ignorespaces DiabetesNet ROC Curve}}{35}{}%
+\contentsline {figure}{\numberline {7.7}{\ignorespaces ParkinsonNet Confusion Matrix}}{36}{}%
+\contentsline {figure}{\numberline {7.8}{\ignorespaces ParkinsonNet ROC Curve}}{36}{}%
+\contentsline {figure}{\numberline {7.9}{\ignorespaces Model Accuracy Comparison with Literature}}{39}{}%
+\addvspace {10\p@ }

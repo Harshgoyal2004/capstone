@@ -25,42 +25,42 @@ capstone/
     +-- streamlit_app.py       # Streamlit chat UI
 \end{verbatim}
 
-\section{Key Implementation Details}
+\section{Implementation Specifics}
 
-\subsection{FastAPI Backend (\texttt{app.py})}
+\subsection{Backend Application (\texttt{app.py})}
 
-The FastAPI application is configured with \ac{cors} middleware allowing all origins, enabling the Streamlit frontend to communicate across origins during local development. The startup event pre-loads all three models using each module's \texttt{\_get\_model()} singleton function, logging load status to standard output.
+FastAPI configuration includes the use of \ac{cors} middleware, which allows all origins in order to facilitate cross-origin communication between Streamlit frontend and API during local development. The app uses the startup event to load all three models using \texttt{\_get\_model()} functions of respective modules.
 
-The \texttt{/chat} endpoint implements the double-pass \ac{llm} architecture. A critical implementation detail is the injection of upload status notes into the most recent user message:
+The \texttt{/chat} endpoint implements the double pass \ac{llm} system. An important detail in its implementation is the inclusion of status notes into the latest user message indicating whether particular file types have been previously uploaded to the app:
 
 \begin{verbatim}
 if request.ecg_file_path:
     status_notes.append("The user has already uploaded an ECG file.")
 \end{verbatim}
 
-This instructs the \ac{llm} not to ask repeatedly for files already provided, and to mark them as \texttt{"provided"} in the \texttt{<MODEL\_INPUT>} block.
+The \ac{llm} will use the presence of this note to refrain from asking about uploading the file again and to categorize it as \texttt{"provided"} in \texttt{<MODEL\_INPUT>}.
 
 \subsection{ECG Inference (\texttt{inference/heart.py})}
 
-The \texttt{predict()} function handles CSV files with either single or multiple columns (always using the first column). Signal resampling from non-360 Hz sources is supported via \texttt{scipy.signal.resample}. The model output is risk-stratified using the empirically chosen thresholds: Low ($< 0.35$), Moderate ($0.35$–$0.70$), High ($\geq 0.70$).
+The \texttt{predict()} method supports CSV inputs with a single or multiple columns, in the latter case always utilizing only the first one. Signal resampling from non-360Hz source data is performed using \texttt{scipy.signal.resample}. Output risk score is stratified into three categories using the empirically determined thresholds: Low (< 0.35), Moderate (0.35 - 0.70), High (>= 0.70).
 
-\subsection{Voice Feature Extraction (\texttt{inference/parkinson.py})}
+\subsection{Parkinson Voice Inference (\texttt{inference/parkinson.py})}
 
-The pYIN F0 estimator returns a voiced/unvoiced flag array alongside pitch values. Only voiced frames are used for computing jitter and shimmer statistics, to avoid contamination from silence or unvoiced consonants. Nonlinear features (RPDE, DFA, D2) are computed using custom NumPy implementations of the Grassberger-Procaccia algorithm and detrended fluctuation analysis.
+The pYIN F0 estimator yields additional binary array of voiced/unvoiced segments, which is used to discard any silence or unvoiced consonant segments from further analysis of jitter and shimmer measures. All nonlinear features (RPDE, DFA, D2) are calculated using the corresponding NumPy implementations of Grassberger-Procaccia algorithm and detrended fluctuation analysis.
 
-\subsection{LLM System Prompt Engineering (\texttt{chat/groq\_client.py})}
+\subsection{LLM Prompt Engineering (\texttt{chat/groq\_client.py})}
 
-The system prompt is structured in five sections: Role Definition, Data Collection Protocol (with exact \texttt{<MODEL\_INPUT>} format), Result Explanation Guidelines, and Safety Rules. The temperature is set to $0.7$ to balance response coherence with natural conversational variation. The \texttt{max\_output\_tokens} is capped at 2048, sufficient for both intake and explanation responses.
+System prompt includes four sections in total: Role definition, Data Collection Protocol (describing \texttt{<MODEL\_INPUT>} in full), Guidelines for Result Interpretation, and Safety Rules. Temperature is set to 0.7, providing a good balance between coherence and natural variation. \texttt{max\_output\_tokens} parameter is capped at 2048, sufficient for intake and interpretation responses.
 
-\subsection{Streamlit Frontend (\texttt{ui/streamlit\_app.py})}
+\subsection{Streamlit App UI (\texttt{ui/streamlit\_app.py})}
 
-Functioning comprehensively, the frontend actively maintains a rigid persistence layer built directly atop Streamlit's native \texttt{st.session\_state} architecture. This ensures the conversational interface inherently retains the complete structured chat message history across multiple sequential interactions. Concurrently, the state engine securely caches the local system paths pointing toward definitively uploaded \ac{ecg} and voice feature files, strictly preventing redundant data requests. Finally, this session cache securely temporarily houses the latest computed numerical model results, explicitly isolating probabilistic risk levels alongside the active triage classifications directly mapped for immediate reactive dashboard rendering.
+Frontend state management relies on Streamlit's \texttt{st.session\_state} variable. It enables persistent storage of chat state in memory for sequential conversations. The state engine also keeps a cache of local file paths associated with each upload, avoiding duplicate file uploads. Finally, it stores the risk levels and triage results temporarily for displaying on the dashboard.
 
-Risk badges are rendered using custom HTML/CSS within \texttt{st.markdown()} calls, providing colour-coded displays (green for low/stable, yellow for moderate/borderline/mild, red for high/elevated). A medical disclaimer modal is displayed on first load.
+Custom HTML/CSS code in \texttt{st.markdown()} blocks is used for risk badges rendering, showing appropriate color coding based on level (green for low/stable, yellow for moderate/borderline/mild, red for high/elevated). Medical disclaimer modal appears on the first load.
 
-\subsection{Deployment (\texttt{render.yaml})}
+\subsection{App Deployment (\texttt{render.yaml})}
 
-The backend is configured for deployment on Render using \texttt{render.yaml}, specifying a Docker-based service with the \texttt{Dockerfile} at the repository root. The Dockerfile installs all dependencies from \texttt{requirements.txt} and launches the FastAPI server on port 8000 using Uvicorn.
+Render.yaml describes how to deploy the app as a Docker service, mounting \texttt{Dockerfile} found at the root of the git repository as the base image. The Dockerfile runs \texttt{pip install -r requirements.txt} to install all dependencies, then starts FastAPI server on port 8000 with Uvicorn.
 
 \section{Challenges and Solutions}
 
